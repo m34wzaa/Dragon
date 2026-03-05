@@ -478,36 +478,36 @@
 
 					if (keys['d']) { 
 						if (onGround) {
-							torso.rotateOnAxis(yaxis, -0.03);
+							torso.rotateOnAxis(yaxis, -0.015);
 							yawing = -1
 						} else {
-							torso.rotateOnAxis(raxis,  0.08); 
+							torso.rotateOnAxis(raxis,  0.04); 
 							rolling =   1; 
 						}
 					}
 					if (keys['a']) { 
 						if (onGround) {
-							torso.rotateOnAxis(yaxis, 0.03);
+							torso.rotateOnAxis(yaxis, 0.015);
 							yawing = 1
 						} else {
-							torso.rotateOnAxis(raxis,  -0.08); 
+							torso.rotateOnAxis(raxis,  -0.04); 
 							rolling =   -1; 
 						}
 					}
 					if (keys['s']) { 
 						if (!onGround) {
-							torso.rotateOnAxis(paxis, -0.04 + (wing2.rotation.y - minrot - 0.3) * 0.02); 
+							torso.rotateOnAxis(paxis, -0.02 + (wing2.rotation.y - minrot - 0.3) * 0.01); 
 							pitching = -1; 
 						} else {
-							vel.addScaledVector(forw, -0.02);
+							vel.addScaledVector(forw, -0.01);
 						}
 					}
 					if (keys['w']) { 
 						if (!onGround) {
-							torso.rotateOnAxis(paxis,  0.04 + (wing2.rotation.y - minrot - 0.3) * -0.02); 
+							torso.rotateOnAxis(paxis,  0.02 + (wing2.rotation.y - minrot - 0.3) * -0.01); 
 							pitching =  1; 
 						} else {
-							vel.addScaledVector(forw, 0.02);
+							vel.addScaledVector(forw, 0.01);
 						}
 					}
 					if (keys[' ']) {
