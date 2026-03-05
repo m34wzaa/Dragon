@@ -43,24 +43,24 @@
 					exponent: { value: 0.6 }
 				},
 				vertexShader: `
-			        varying vec3 vWorldPosition;
-			        void main() {
-			            vec4 worldPos = modelMatrix * vec4(position, 1.0);
-			            vWorldPosition = worldPos.xyz;
-			            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-			        }
-			    `,
+					varying vec3 vWorldPosition;
+					void main() {
+						vec4 worldPos = modelMatrix * vec4(position, 1.0);
+						vWorldPosition = worldPos.xyz;
+						gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+					}
+				`,
 				fragmentShader: `
-			        uniform vec3 topColor;
-			        uniform vec3 bottomColor;
-			        uniform float offset;
-			        uniform float exponent;
-			        varying vec3 vWorldPosition;
-			        void main() {
-			            float h = normalize(vWorldPosition).y + offset;
-			            gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
-			        }
-			    `,
+					uniform vec3 topColor;
+					uniform vec3 bottomColor;
+					uniform float offset;
+					uniform float exponent;
+					varying vec3 vWorldPosition;
+					void main() {
+						float h = normalize(vWorldPosition).y + offset;
+						gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
+					}
+				`,
 				side: THREE.BackSide // render inside of sphere
 			});
 			const sky = new THREE.Mesh(skyGeo, skyMat);
@@ -200,6 +200,59 @@
 			light2.position.set(0, 20, 0)
 			scene.add(light2)
 			const render = new THREE.WebGLRenderer();
+			let myId = null;
+			const otherPlayers = {};
+			const socket = new WebSocket('ws://localhost:8080');
+
+			function makePlayerMesh() {
+				const group = new THREE.Group();
+				// torso box
+				const body = new THREE.Mesh(
+					new THREE.BoxGeometry(8, 5, 12),
+					new THREE.MeshStandardMaterial({ color: 0xaa2222 })
+				);
+				// wing stubs
+				const wingGeo = new THREE.BoxGeometry(10, 1, 6);
+				const wingMat = new THREE.MeshStandardMaterial({ color: 0x881111 });
+				const wL = new THREE.Mesh(wingGeo, wingMat);
+				const wR = new THREE.Mesh(wingGeo, wingMat);
+				wL.position.set(-9, 0, 0);
+				wR.position.set( 9, 0, 0);
+				// head box
+				const head = new THREE.Mesh(
+					new THREE.BoxGeometry(4, 4, 5),
+					new THREE.MeshStandardMaterial({ color: 0xcc3333 })
+				);
+				head.position.set(0, 1, 8);
+				group.add(body, wL, wR, head);
+				return group;
+			}
+
+			socket.addEventListener('message', (e) => {
+				const msg = JSON.parse(e.data);
+
+				if (msg.type === 'init') {
+					myId = msg.id;
+				}
+				if (msg.type === 'join' || (msg.type === 'move' && !otherPlayers[msg.id])) {
+					const mesh = makePlayerMesh();
+					scene.add(mesh);
+					otherPlayers[msg.id] = mesh;
+				}
+				if (msg.type === 'move' && otherPlayers[msg.id]) {
+					const p = otherPlayers[msg.id];
+					// smooth lerp toward received position
+					p.position.lerp(new THREE.Vector3(msg.pos.x, msg.pos.y, msg.pos.z), 0.2);
+					p.quaternion.slerp(
+						new THREE.Quaternion(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w), 0.2
+					);
+				}
+				if (msg.type === 'leave' && otherPlayers[msg.id]) {
+					scene.remove(otherPlayers[msg.id]);
+					delete otherPlayers[msg.id];
+				}
+			});
+
 			// initial size
 			render.setSize(window.innerWidth, window.innerHeight);
 
@@ -413,6 +466,16 @@
 
 
 					head.getWorldPosition(headpos)
+					// send position to server every frame
+					if (socket.readyState === 1 && myId && torso) {
+					    const q = torso.quaternion;
+					    socket.send(JSON.stringify({
+					        type: 'move',
+					        pos: { x: torso.position.x, y: torso.position.y, z: torso.position.z },
+					        quat: { x: q.x, y: q.y, z: q.z, w: q.w }
+					    }));
+					}
+
 					const camB = new THREE.Vector3(0, 0, 1).applyQuaternion(torso.quaternion);
 					const camU = new THREE.Vector3(0, 1, 0).applyQuaternion(torso.quaternion);
 					const camt = headpos.clone()
