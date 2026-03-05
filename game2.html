@@ -205,28 +205,30 @@
 			const socket = new WebSocket('wss://dragon-production-988c.up.railway.app');
 
 			function makePlayerMesh() {
-				const group = new THREE.Group();
-				// torso box
-				const body = new THREE.Mesh(
-					new THREE.BoxGeometry(8, 5, 12),
-					new THREE.MeshStandardMaterial({ color: 0xaa2222 })
-				);
-				// wing stubs
-				const wingGeo = new THREE.BoxGeometry(10, 1, 6);
-				const wingMat = new THREE.MeshStandardMaterial({ color: 0x881111 });
-				const wL = new THREE.Mesh(wingGeo, wingMat);
-				const wR = new THREE.Mesh(wingGeo, wingMat);
-				wL.position.set(-9, 0, 0);
-				wR.position.set( 9, 0, 0);
-				// head box
-				const head = new THREE.Mesh(
-					new THREE.BoxGeometry(4, 4, 5),
-					new THREE.MeshStandardMaterial({ color: 0xcc3333 })
-				);
-				head.position.set(0, 1, 8);
-				group.add(body, wL, wR, head);
+			    const group = new THREE.Group();
+			    const body = new THREE.Mesh(
+			        new THREE.BoxGeometry(8, 5, 12),
+			        new THREE.MeshStandardMaterial({ color: 0xaa2222 })
+			    );
+			    const wingGeo = new THREE.BoxGeometry(10, 1, 6);
+			    const wingMat = new THREE.MeshStandardMaterial({ color: 0x881111 });
+			    const wL = new THREE.Mesh(wingGeo, wingMat);
+			    const wR = new THREE.Mesh(wingGeo, wingMat);
+			    wL.position.set(-9, 0, 0);
+			    wR.position.set( 9, 0, 0);
+			    const headMesh = new THREE.Mesh(
+			        new THREE.BoxGeometry(4, 4, 5),
+			        new THREE.MeshStandardMaterial({ color: 0xcc3333 })
+			    );
+			    headMesh.position.set(0, 1, 8);
+				group.add(body, wL, wR, headMesh);
+				group.userData.wL = wL;  // ← add this
+				group.userData.wR = wR;  // ← add this
+				group.scale.setScalar(200);
 				return group;
+
 			}
+
 
 			socket.addEventListener('message', (e) => {
 				const msg = JSON.parse(e.data);
@@ -241,12 +243,23 @@
 				}
 				if (msg.type === 'move' && otherPlayers[msg.id]) {
 					const p = otherPlayers[msg.id];
-					// smooth lerp toward received position
-					p.position.lerp(new THREE.Vector3(msg.pos.x, msg.pos.y, msg.pos.z), 0.2);
-					p.quaternion.slerp(
-						new THREE.Quaternion(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w), 0.2
+				
+					const target = new THREE.Vector3(msg.pos.x, msg.pos.y, msg.pos.z);
+					target.addScaledVector(
+						new THREE.Vector3(msg.vel.x, msg.vel.y, msg.vel.z), 3
 					);
+					p.position.lerp(target, 0.3);
+				
+					p.quaternion.slerp(
+						new THREE.Quaternion(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w), 0.3
+					);
+				
+					if (p.userData.wL && p.userData.wR) {
+						p.userData.wL.rotation.y = -msg.wing;
+						p.userData.wR.rotation.y =  msg.wing;
+					}
 				}
+
 				if (msg.type === 'leave' && otherPlayers[msg.id]) {
 					scene.remove(otherPlayers[msg.id]);
 					delete otherPlayers[msg.id];
@@ -471,10 +484,14 @@
 					    const q = torso.quaternion;
 					    socket.send(JSON.stringify({
 					        type: 'move',
-					        pos: { x: torso.position.x, y: torso.position.y, z: torso.position.z },
-					        quat: { x: q.x, y: q.y, z: q.z, w: q.w }
+					        pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
+					        quat: { x: q.x, y: q.y, z: q.z, w: q.w },
+					        vel:  { x: vel.x, y: vel.y, z: vel.z },  // ← ADD
+					        wing: wing2.rotation.y,                    // ← ADD
+					        seed: seed                                 // ← ADD
 					    }));
 					}
+
 
 					const camB = new THREE.Vector3(0, 0, 1).applyQuaternion(torso.quaternion);
 					const camU = new THREE.Vector3(0, 1, 0).applyQuaternion(torso.quaternion);
