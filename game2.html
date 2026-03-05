@@ -237,12 +237,21 @@
 			    }
 			    if (msg.id === myId) return;
 			    if (msg.type === 'join' || msg.type === 'move') {
-			        if (!otherPlayers[msg.id]) {
-			            const mesh = makePlayerMesh();
-			            scene.add(mesh);
-			            otherPlayers[msg.id] = mesh;
-			        }
-			    }
+				    if (!otherPlayers[msg.id]) {
+				        const mesh = makePlayerMesh();
+				        scene.add(mesh);
+				        otherPlayers[msg.id] = mesh;
+				        console.log('built mesh for', msg.id);
+				
+				        // Snap to actual position immediately instead of lerping from (0,0,0)
+				        if (msg.pos) {
+				            mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
+				        }
+				        if (msg.quat) {
+				            mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
+				        }
+				    }
+				}
 			    if (msg.type === 'move' && otherPlayers[msg.id] && msg.pos && msg.vel) {
 			        const p = otherPlayers[msg.id];
 			        const target = new THREE.Vector3(msg.pos.x, msg.pos.y, msg.pos.z);
