@@ -28,6 +28,7 @@
 			import * as THREE from 'https://unpkg.com/three@latest/build/three.module.js';
 			import { GLTFLoader } from 'https://unpkg.com/three@latest/examples/jsm/loaders/GLTFLoader.js';
 			const scene = new THREE.Scene();
+			let vel = new THREE.Vector3();
 			scene.background = new THREE.Color(0x222222);
 			let dist = 500;
 			scene.fog = new THREE.Fog(0x222222, dist - (dist * 0.4), dist);
@@ -163,7 +164,7 @@
 				});
 			});*/
 			const WORLD_SEED = 1; // ← change this number for a different world
-			noise.seed(WORLD_SEED);
+			window.noise.seed(WORLD_SEED);
 			const CHUNK_SIZE = 1000;
 			const CHUNK_SEGS = 50;
 			const VIEW_DIST  = 1;   // chunks in each direction (3x3 grid)
@@ -172,6 +173,10 @@
 			function chunkKey(cx, cz) { return `${cx},${cz}`; }
 			
 			function makeChunk(cx, cz) {
+				const h = 
+					window.noise.perlin2(wx * 0.0008, wz * 0.0008) * 300 +
+					window.noise.perlin2(wx * 0.003,  wz * 0.003)  * 80  +
+					window.noise.perlin2(wx * 0.01,   wz * 0.01)   * 20;
 			    const geo = new THREE.PlaneGeometry(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SEGS, CHUNK_SEGS);
 			    geo.rotateX(-Math.PI / 2);
 			    const pos = geo.attributes.position;
@@ -372,7 +377,6 @@
 			const yaxis = new THREE.Vector3(0, 1, 0);
 			const raxis = new THREE.Vector3(0, 0, 1);
 			const forw = new THREE.Vector3();
-			let vel = new THREE.Vector3();
 			const gravity = new THREE.Vector3(0, -0.004, 0); 
 			const up = new THREE.Vector3(0, 1, 0);  
 			const slow = 0.92;
