@@ -15,7 +15,7 @@
 	</head>
 	<body>
 		<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
-		<script src="https://unpkg.com/noisejs@2.1.0/index.js"></script>
+		<script src="https://unpkg.com/noisejs@2.1.0/perlin.js"></script>
 		<script type="importmap">
 			{
 				"imports": {
@@ -173,10 +173,6 @@
 			function chunkKey(cx, cz) { return `${cx},${cz}`; }
 			
 			function makeChunk(cx, cz) {
-				const h = 
-					window.noise.perlin2(wx * 0.0008, wz * 0.0008) * 300 +
-					window.noise.perlin2(wx * 0.003,  wz * 0.003)  * 80  +
-					window.noise.perlin2(wx * 0.01,   wz * 0.01)   * 20;
 			    const geo = new THREE.PlaneGeometry(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SEGS, CHUNK_SEGS);
 			    geo.rotateX(-Math.PI / 2);
 			    const pos = geo.attributes.position;
@@ -186,9 +182,9 @@
 			        const wz = pos.getZ(i) + cz * CHUNK_SIZE; // world z
 			
 			        const h =
-			            noise.perlin2(wx * 0.0008, wz * 0.0008) * 300 +
-			            noise.perlin2(wx * 0.003,  wz * 0.003)  * 80  +
-			            noise.perlin2(wx * 0.01,   wz * 0.01)   * 20;
+			            window.noise.perlin2(wx * 0.0008, wz * 0.0008) * 300 +
+			            window.noise.perlin2(wx * 0.003,  wz * 0.003)  * 80  +
+			            window.noise.perlin2(wx * 0.01,   wz * 0.01)   * 20;
 			
 			        pos.setY(i, h);
 			    }
