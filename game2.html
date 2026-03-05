@@ -15,6 +15,7 @@
 	</head>
 	<body>
 		<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+		<script src="https://unpkg.com/noisejs@2.1.0/index.js"></script>
 		<script type="importmap">
 			{
 				"imports": {
@@ -146,7 +147,7 @@
 				torso.position.set(0, 50, 0);
 				vel.set(0, 0, 0.5);
 			});
-			loader.load('tex/scene.gltf', (gltf) => {
+			/*loader.load('tex/scene.gltf', (gltf) => {
 				const enviro = gltf.scene;
 
 				const box = new THREE.Box3().setFromObject(enviro);
@@ -160,7 +161,73 @@
 				enviro.traverse((child) => {
 					if (child.isMesh) groundMeshes.push(child);
 				});
-			});
+			});*/
+			const WORLD_SEED = 1; // ← change this number for a different world
+			noise.seed(WORLD_SEED);
+			const CHUNK_SIZE = 1000;
+			const CHUNK_SEGS = 50;
+			const VIEW_DIST  = 1;   // chunks in each direction (3x3 grid)
+			const chunks = {};
+			
+			function chunkKey(cx, cz) { return `${cx},${cz}`; }
+			
+			function makeChunk(cx, cz) {
+			    const geo = new THREE.PlaneGeometry(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SEGS, CHUNK_SEGS);
+			    geo.rotateX(-Math.PI / 2);
+			    const pos = geo.attributes.position;
+			
+			    for (let i = 0; i < pos.count; i++) {
+			        const wx = pos.getX(i) + cx * CHUNK_SIZE; // world x
+			        const wz = pos.getZ(i) + cz * CHUNK_SIZE; // world z
+			
+			        const h =
+			            noise.perlin2(wx * 0.0008, wz * 0.0008) * 300 +
+			            noise.perlin2(wx * 0.003,  wz * 0.003)  * 80  +
+			            noise.perlin2(wx * 0.01,   wz * 0.01)   * 20;
+			
+			        pos.setY(i, h);
+			    }
+			    pos.needsUpdate = true;
+			    geo.computeVertexNormals();
+			
+			    const mat  = new THREE.MeshStandardMaterial({ color: 0x888888 });
+			    const mesh = new THREE.Mesh(geo, mat);
+			    mesh.position.set(cx * CHUNK_SIZE, 0, cz * CHUNK_SIZE);
+			    scene.add(mesh);
+			    groundMeshes.push(mesh);
+			    return mesh;
+			}
+			
+			function updateChunks() {
+			    if (!torso) return;
+			
+			    // figure out which chunk the player is in
+			    const cx = Math.round(torso.position.x / CHUNK_SIZE);
+			    const cz = Math.round(torso.position.z / CHUNK_SIZE);
+			
+			    // generate nearby chunks that don't exist yet
+			    for (let dx = -VIEW_DIST; dx <= VIEW_DIST; dx++) {
+			        for (let dz = -VIEW_DIST; dz <= VIEW_DIST; dz++) {
+			            const key = chunkKey(cx + dx, cz + dz);
+			            if (!chunks[key]) {
+			                chunks[key] = makeChunk(cx + dx, cz + dz);
+			            }
+			        }
+			    }
+			
+			    // remove chunks too far away
+			    for (const key in chunks) {
+			        const [kcx, kcz] = key.split(',').map(Number);
+			        if (Math.abs(kcx - cx) > VIEW_DIST + 1 || Math.abs(kcz - cz) > VIEW_DIST + 1) {
+			            scene.remove(chunks[key]);
+			            groundMeshes.splice(groundMeshes.indexOf(chunks[key]), 1);
+			            chunks[key].geometry.dispose();
+			            delete chunks[key];
+			        }
+			    }
+			}
+
+
 
 
 			const he = 1.222222
@@ -333,6 +400,7 @@
 
 			function anim() {
 				requestAnimationFrame(anim);
+				updateChunks();
 				timer++;
 
 
