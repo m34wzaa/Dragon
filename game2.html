@@ -171,7 +171,7 @@
 
 				torso.scale.setScalar(200);
 				scene.add(torso);
-				torso.position.set(0, 50, 0);
+				torso.position.set(0, 300, 0);
 				vel.set(0, 0, 0.5);
 			});
 			/*loader.load('tex/scene.gltf', (gltf) => {
@@ -207,13 +207,19 @@
 			        const wx = pos.getX(i) + cx * CHUNK_SIZE; // world x
 			        const wz = pos.getZ(i) + cz * CHUNK_SIZE; // world z
 			
-			        const raw =
-			            perlin2(wx * 0.0008, wz * 0.0008) * 300 +
-			            perlin2(wx * 0.003,  wz * 0.003)  * 80  +
-			            perlin2(wx * 0.01,   wz * 0.01)   * 20;
+					const raw =
+					    perlin2(wx * 0.0008, wz * 0.0008) * 1.0 +
+					    perlin2(wx * 0.003,  wz * 0.003)  * 0.3 +
+					    perlin2(wx * 0.01,   wz * 0.01)   * 0.08;
+					
+					// shift raw up so it's always positive (range was ~-1.4 to 1.4, now 0 to 2.8)
+					const shifted = raw + 1.4;
+					
+					// sharpen peaks without creating hard cliffs
+					const sharp = Math.pow(shifted / 2.8, 2.0) * 2.8;
+					
+					const h = sharp * 150;
 
-					const sharp = Math.pow(Math.max(raw, 0), 2.5);
-					const h = sharp * 400
 			
 			        pos.setY(i, h);
 			    }
@@ -449,7 +455,7 @@
 				//if (keys['e']) head.rotation.y -= 0.02;
 				if (torso) {
 					raycaster.set(
-						new THREE.Vector3(torso.position.x, torso.position.y + 200, torso.position.z),
+						new THREE.Vector3(torso.position.x, torso.position.y + 600, torso.position.z),
 						downDir
 					);
 					const hits = raycaster.intersectObjects(groundMeshes, false);
