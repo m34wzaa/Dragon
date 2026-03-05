@@ -211,17 +211,37 @@
 			        const wx = pos.getX(i) + cx * CHUNK_SIZE; // world x
 			        const wz = pos.getZ(i) + cz * CHUNK_SIZE; // world z
 			
-			        const h =
+			        const raw =
 			            perlin2(wx * 0.0008, wz * 0.0008) * 300 +
 			            perlin2(wx * 0.003,  wz * 0.003)  * 80  +
 			            perlin2(wx * 0.01,   wz * 0.01)   * 20;
+
+					const sharp = Math.pow(Math.max(raw, 0), 2.5);
+					const h = sharp * 400
 			
 			        pos.setY(i, h);
 			    }
 			    pos.needsUpdate = true;
 			    geo.computeVertexNormals();
+				const normals = geo.attributes.normal;
+				const colors  = new Float32Array(pos.count * 3);
+				
+				for (let i = 0; i < pos.count; i++) {
+				    const ny = normals.getY(i); // 1 = flat, 0 = vertical cliff
+				
+				    // ny close to 1 = flat = white, ny close to 0 = steep = dark grey
+				    const c = THREE.MathUtils.clamp(ny, 0.3, 1.0);
+				    colors[i * 3]     = c;  // R
+				    colors[i * 3 + 1] = c;  // G
+				    colors[i * 3 + 2] = c;  // B
+				}
+				geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+				
+				const mat = new THREE.MeshStandardMaterial({
+				    vertexColors: true,
+				    flatShading: false
+				});
 			
-			    const mat  = new THREE.MeshStandardMaterial({ color: 0x888888 });
 			    const mesh = new THREE.Mesh(geo, mat);
 			    mesh.position.set(cx * CHUNK_SIZE, 0, cz * CHUNK_SIZE);
 			    scene.add(mesh);
