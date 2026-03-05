@@ -1,37 +1,33 @@
+const http = require('http');
 const { WebSocketServer } = require('ws');
-const wss = new WebSocketServer({ port: 8080 });
 
 const players = {};
+const server = http.createServer((req, res) => {
+    res.writeHead(200);
+    res.end('ok');
+});
+const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
     const id = Math.random().toString(36).slice(2);
     players[id] = {};
-
     ws.send(JSON.stringify({ type: 'init', id }));
-
-    // send existing players to the new connection
     Object.entries(players).forEach(([pid, pdata]) => {
         if (pid !== id && pdata.pos) {
             ws.send(JSON.stringify({ type: 'join', id: pid }));
         }
     });
-
     ws.on('message', (data) => {
         const msg = JSON.parse(data);
         if (msg.type === 'move') {
             players[id] = { pos: msg.pos, quat: msg.quat };
             wss.clients.forEach((client) => {
                 if (client !== ws && client.readyState === 1) {
-                    client.send(JSON.stringify({
-                        type: 'move', id,
-                        pos: msg.pos,
-                        quat: msg.quat
-                    }));
+                    client.send(JSON.stringify({ type: 'move', id, pos: msg.pos, quat: msg.quat, vel: msg.vel, wing: msg.wing, seed: msg.seed }));
                 }
             });
         }
     });
-
     ws.on('close', () => {
         delete players[id];
         wss.clients.forEach((client) => {
@@ -41,4 +37,6 @@ wss.on('connection', (ws) => {
         });
     });
 });
-console.log('Server running on ws://localhost:8080');
+
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => console.log('Server on port', PORT));
