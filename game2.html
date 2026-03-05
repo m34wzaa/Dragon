@@ -231,40 +231,44 @@
 
 
 			socket.addEventListener('message', (e) => {
-				const msg = JSON.parse(e.data);
-
-				if (msg.type === 'init') {
-					myId = msg.id;
-				}
-				if (msg.type === 'join' || (msg.type === 'move' && !otherPlayers[msg.id])) {
-					const mesh = makePlayerMesh();
-					scene.add(mesh);
-					otherPlayers[msg.id] = mesh;
-				}
-				if (msg.type === 'move' && otherPlayers[msg.id]) {
-					const p = otherPlayers[msg.id];
-				
-					const target = new THREE.Vector3(msg.pos.x, msg.pos.y, msg.pos.z);
-					target.addScaledVector(
-						new THREE.Vector3(msg.vel.x, msg.vel.y, msg.vel.z), 3
-					);
-					p.position.lerp(target, 0.3);
-				
-					p.quaternion.slerp(
-						new THREE.Quaternion(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w), 0.3
-					);
-				
-					if (p.userData.wL && p.userData.wR) {
-						p.userData.wL.rotation.y = -msg.wing;
-						p.userData.wR.rotation.y =  msg.wing;
-					}
-				}
-
-				if (msg.type === 'leave' && otherPlayers[msg.id]) {
-					scene.remove(otherPlayers[msg.id]);
-					delete otherPlayers[msg.id];
-				}
+			    const msg = JSON.parse(e.data);
+			
+			    if (msg.type === 'init') {
+			        myId = msg.id;
+			    }
+			
+			    // skip messages about yourself
+			    if (msg.id === myId) return;
+			
+			    if (msg.type === 'join' || msg.type === 'move') {
+			        // always create mesh if it doesn't exist yet
+			        if (!otherPlayers[msg.id]) {
+			            const mesh = makePlayerMesh();
+			            scene.add(mesh);
+			            otherPlayers[msg.id] = mesh;
+			        }
+			    }
+			
+			    if (msg.type === 'move' && otherPlayers[msg.id] && msg.pos && msg.vel) {
+			        const p = otherPlayers[msg.id];
+			        const target = new THREE.Vector3(msg.pos.x, msg.pos.y, msg.pos.z);
+			        target.addScaledVector(new THREE.Vector3(msg.vel.x, msg.vel.y, msg.vel.z), 3);
+			        p.position.lerp(target, 0.3);
+			        p.quaternion.slerp(
+			            new THREE.Quaternion(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w), 0.3
+			        );
+			        if (p.userData.wL && p.userData.wR) {
+			            p.userData.wL.rotation.y = -msg.wing;
+			            p.userData.wR.rotation.y =  msg.wing;
+			        }
+			    }
+			
+			    if (msg.type === 'leave' && otherPlayers[msg.id]) {
+			        scene.remove(otherPlayers[msg.id]);
+			        delete otherPlayers[msg.id];
+			    }
 			});
+
 
 			// initial size
 			render.setSize(window.innerWidth, window.innerHeight);
