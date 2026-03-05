@@ -97,27 +97,23 @@
 			});
 			const sky = new THREE.Mesh(skyGeo, skyMat);
 			scene.add(sky);
-			scene.background = null; // remove flat background color, sky handles it now
+			scene.background = null; 
 
 
-			//trying to make buffer geometry
 			const n = 0
 			const loader = new GLTFLoader();
 			function wall(x, y, z, rot) {
 				loader.load('mount.glb', (gltf) => {
 					const mount = gltf.scene;
 
-					// 1. Compute bounding box
 					const box = new THREE.Box3().setFromObject(mount);
 					const size = new THREE.Vector3();
 					const center = new THREE.Vector3();
 					box.getSize(size);
 					box.getCenter(center);
 
-					// 2. Move model so its center is at (0,0,0)
 					mount.position.sub(center);
 
-					// 3. Uniform scale to a nice size (e.g. height ~2 units)
 					const maxDim = Math.max(size.x, size.y, size.z);
 					const scale = 3 / maxDim;
 					mount.scale.setScalar(scale);
@@ -227,9 +223,8 @@
 				const colors  = new Float32Array(pos.count * 3);
 				
 				for (let i = 0; i < pos.count; i++) {
-				    const ny = normals.getY(i); // 1 = flat, 0 = vertical cliff
+				    const ny = normals.getY(i);
 				
-				    // ny close to 1 = flat = white, ny close to 0 = steep = dark grey
 				    const c = THREE.MathUtils.clamp(ny, 0.3, 1.0);
 				    colors[i * 3]     = c;  // R
 				    colors[i * 3 + 1] = c;  // G
@@ -252,11 +247,9 @@
 			function updateChunks() {
 			    if (!torso) return;
 			
-			    // figure out which chunk the player is in
 			    const cx = Math.round(torso.position.x / CHUNK_SIZE);
 			    const cz = Math.round(torso.position.z / CHUNK_SIZE);
 			
-			    // generate nearby chunks that don't exist yet
 			    for (let dx = -VIEW_DIST; dx <= VIEW_DIST; dx++) {
 			        for (let dz = -VIEW_DIST; dz <= VIEW_DIST; dz++) {
 			            const key = chunkKey(cx + dx, cz + dz);
@@ -266,7 +259,6 @@
 			        }
 			    }
 			
-			    // remove chunks too far away
 			    for (const key in chunks) {
 			        const [kcx, kcz] = key.split(',').map(Number);
 			        if (Math.abs(kcx - cx) > VIEW_DIST + 1 || Math.abs(kcz - cz) > VIEW_DIST + 1) {
@@ -359,10 +351,8 @@
 
 
 
-			// initial size
 			render.setSize(window.innerWidth, window.innerHeight);
 
-			// update camera and renderer when window is resized
 			window.addEventListener('resize', () => {
 				cam.aspect = window.innerWidth / window.innerHeight;
 				cam.updateProjectionMatrix();
@@ -384,17 +374,14 @@
 				// get dragon's actual world-space forward
 				const currentForward = new THREE.Vector3(0, 0, 1).applyQuaternion(torso.quaternion);
 
-				// project onto surface plane (not just world horizontal)
 				currentForward.addScaledVector(surfaceNormal, -currentForward.dot(surfaceNormal));
 
-				// fallback if dragon is pointing directly into the ground
 				if (currentForward.lengthSq() < 0.0001) {
 					currentForward.set(0, 0, 1);
 					currentForward.addScaledVector(surfaceNormal, -currentForward.dot(surfaceNormal));
 				}
 				currentForward.normalize();
 
-				// build a clean orthonormal basis from surface normal + projected forward
 				const right = new THREE.Vector3().crossVectors(surfaceNormal, currentForward).normalize();
 				const fwd   = new THREE.Vector3().crossVectors(right, surfaceNormal).normalize();
 
