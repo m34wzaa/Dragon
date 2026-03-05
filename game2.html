@@ -171,7 +171,7 @@
 
 				torso.scale.setScalar(200);
 				scene.add(torso);
-				torso.position.set(0, 300, 0);
+				torso.position.set(0, 500, 0);
 				vel.set(0, 0, 0.5);
 			});
 			/*loader.load('tex/scene.gltf', (gltf) => {
@@ -216,9 +216,9 @@
 					const shifted = raw + 1.4;
 					
 					// sharpen peaks without creating hard cliffs
-					const sharp = Math.pow(shifted / 2.8, 2.0) * 2.8;
+					const sharp = Math.pow(shifted / 2.8, 3.5) * 2.8;
 					
-					const h = sharp * 150;
+					const h = sharp * 350;
 
 			
 			        pos.setY(i, h);
@@ -231,7 +231,7 @@
 				for (let i = 0; i < pos.count; i++) {
 				    const ny = normals.getY(i);
 				
-				    const c = THREE.MathUtils.clamp(ny, 0.3, 1.0);
+				    const c = THREE.MathUtils.clamp((ny - 0.5) / 0.5, 0.15, 1.0);;
 				    colors[i * 3]     = c;  // R
 				    colors[i * 3 + 1] = c;  // G
 				    colors[i * 3 + 2] = c;  // B
@@ -292,7 +292,7 @@
 				});
 				return t;
 			}
-			const floor = texx('tx.png');
+			const floor = texx(tx.png);
 			floor.wrapS = THREE.RepeatWrapping;
 			floor.wrapT = THREE.RepeatWrapping;
 			floor.repeat.set(100, 100)
@@ -455,7 +455,7 @@
 				//if (keys['e']) head.rotation.y -= 0.02;
 				if (torso) {
 					raycaster.set(
-						new THREE.Vector3(torso.position.x, torso.position.y + 600, torso.position.z),
+						new THREE.Vector3(torso.position.x, torso.position.y + 800, torso.position.z),
 						downDir
 					);
 					const hits = raycaster.intersectObjects(groundMeshes, false);
