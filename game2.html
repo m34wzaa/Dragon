@@ -15,7 +15,6 @@
 	</head>
 	<body>
 		<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
-		<script src="https://unpkg.com/noisejs@2.1.0/perlin.js"></script>
 		<script type="importmap">
 			{
 				"imports": {
@@ -27,6 +26,37 @@
 		<script type="module">
 			import * as THREE from 'https://unpkg.com/three@latest/build/three.module.js';
 			import { GLTFLoader } from 'https://unpkg.com/three@latest/examples/jsm/loaders/GLTFLoader.js';
+			function createNoise(seed) {
+			    const p = new Uint8Array(512);
+			    const permBase = new Uint8Array(256);
+			    for (let i = 0; i < 256; i++) permBase[i] = i;
+			    let s = seed % 65536 || 1;
+			    for (let i = 255; i > 0; i--) {
+			        s = (s * 16807) % 2147483647;
+			        const j = s % (i + 1);
+			        [permBase[i], permBase[j]] = [permBase[j], permBase[i]];
+			    }
+			    for (let i = 0; i < 512; i++) p[i] = permBase[i & 255];
+			
+			    function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+			    function lerp(a, b, t) { return a + t * (b - a); }
+			    function grad(h, x, y) {
+			        h &= 3;
+			        const u = h < 2 ? x : y;
+			        const v = h < 2 ? y : x;
+			        return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+			    }
+			    return function perlin2(x, y) {
+			        const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+			        x -= Math.floor(x); y -= Math.floor(y);
+			        const u = fade(x), v = fade(y);
+			        const a = p[X] + Y, b = p[X + 1] + Y;
+			        return lerp(
+			            lerp(grad(p[a],   x,   y), grad(p[b],   x-1, y),   u),
+			            lerp(grad(p[a+1], x,   y-1), grad(p[b+1], x-1, y-1), u), v
+			        );
+			    };
+			}
 			const scene = new THREE.Scene();
 			let vel = new THREE.Vector3();
 			scene.background = new THREE.Color(0x222222);
@@ -163,11 +193,11 @@
 					if (child.isMesh) groundMeshes.push(child);
 				});
 			});*/
-			const WORLD_SEED = 1; // ← change this number for a different world
-			window.noise.seed(WORLD_SEED);
+			const WORLD_SEED = 1;
+			const perlin2 = createNoise(WORLD_SEED);
 			const CHUNK_SIZE = 1000;
 			const CHUNK_SEGS = 50;
-			const VIEW_DIST  = 1;   // chunks in each direction (3x3 grid)
+			const VIEW_DIST  = 1; 
 			const chunks = {};
 			
 			function chunkKey(cx, cz) { return `${cx},${cz}`; }
@@ -182,9 +212,9 @@
 			        const wz = pos.getZ(i) + cz * CHUNK_SIZE; // world z
 			
 			        const h =
-			            window.noise.perlin2(wx * 0.0008, wz * 0.0008) * 300 +
-			            window.noise.perlin2(wx * 0.003,  wz * 0.003)  * 80  +
-			            window.noise.perlin2(wx * 0.01,   wz * 0.01)   * 20;
+			            perlin2(wx * 0.0008, wz * 0.0008) * 300 +
+			            perlin2(wx * 0.003,  wz * 0.003)  * 80  +
+			            perlin2(wx * 0.01,   wz * 0.01)   * 20;
 			
 			        pos.setY(i, h);
 			    }
