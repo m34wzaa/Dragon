@@ -1,0 +1,439 @@
+<!doctype HTML>
+<html>
+	<meta charset=UTF-8>
+	<head>
+		<style>
+			body {
+				color: #222222
+			}
+			* {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+					"three/examples/jsm/": "https://unpkg.com/three@0.161.0/examples/jsm/"
+				}
+			}
+		</script>
+		<script type="module">
+			import * as THREE from 'https://unpkg.com/three@latest/build/three.module.js';
+			import { GLTFLoader } from 'https://unpkg.com/three@latest/examples/jsm/loaders/GLTFLoader.js';
+			const scene = new THREE.Scene();
+			scene.background = new THREE.Color(0x222222);
+			let dist = 500;
+			scene.fog = new THREE.Fog(0x222222, dist - (dist * 0.4), dist);
+			let fov = 60;
+			const cam = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.01, dist);
+			cam.position.z = 90;
+			cam.position.y = 0;
+			const skyGeo = new THREE.SphereGeometry(dist * 0.9, 32, 32);
+			const skyMat = new THREE.ShaderMaterial({
+				uniforms: {
+					topColor: { value: new THREE.Color(0x3073AA) }, 
+					bottomColor: { value: new THREE.Color(0x463593) }, 
+					offset: { value: 0.3 },
+					exponent: { value: 0.6 }
+				},
+				vertexShader: `
+			        varying vec3 vWorldPosition;
+			        void main() {
+			            vec4 worldPos = modelMatrix * vec4(position, 1.0);
+			            vWorldPosition = worldPos.xyz;
+			            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			        }
+			    `,
+				fragmentShader: `
+			        uniform vec3 topColor;
+			        uniform vec3 bottomColor;
+			        uniform float offset;
+			        uniform float exponent;
+			        varying vec3 vWorldPosition;
+			        void main() {
+			            float h = normalize(vWorldPosition).y + offset;
+			            gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
+			        }
+			    `,
+				side: THREE.BackSide // render inside of sphere
+			});
+			const sky = new THREE.Mesh(skyGeo, skyMat);
+			scene.add(sky);
+			scene.background = null; // remove flat background color, sky handles it now
+
+
+			//trying to make buffer geometry
+			const n = 0
+			const loader = new GLTFLoader();
+			function wall(x, y, z, rot) {
+				loader.load('mount.glb', (gltf) => {
+					const mount = gltf.scene;
+
+					// 1. Compute bounding box
+					const box = new THREE.Box3().setFromObject(mount);
+					const size = new THREE.Vector3();
+					const center = new THREE.Vector3();
+					box.getSize(size);
+					box.getCenter(center);
+
+					// 2. Move model so its center is at (0,0,0)
+					mount.position.sub(center);
+
+					// 3. Uniform scale to a nice size (e.g. height ~2 units)
+					const maxDim = Math.max(size.x, size.y, size.z);
+					const scale = 3 / maxDim;
+					mount.scale.setScalar(scale);
+
+					scene.add(mount);
+					mount.position.z = z
+					mount.position.y = y
+					mount.position.x = x
+					mount.rotation.y = rot * (Math.PI / 180)
+				});
+			}
+			// dragon parts
+			let head, torso, tail1, tail2, wing1, wing2;
+
+			function loadGLB(path) {
+				return new Promise((resolve) => {
+					loader.load(path, (gltf) => {
+						const part = gltf.scene;
+						// only center it, DON'T scale here
+						const box = new THREE.Box3().setFromObject(part);
+						const center = new THREE.Vector3();
+						box.getCenter(center);
+						part.position.sub(center);
+						resolve(part);
+					});
+				});
+			}
+
+
+			Promise.all([
+				loadGLB('derg/head.glb'),
+				loadGLB('derg/torso.glb'),
+				loadGLB('derg/tail1.glb'),
+				loadGLB('derg/tail2.glb'),
+				loadGLB('derg/wing1.glb'),
+				loadGLB('derg/wing2.glb'),
+			]).then(([h, to, t1, t2, w1, w2]) => {
+				head = h; torso = to;
+				tail1 = t1; tail2 = t2;
+				wing1 = w1; wing2 = w2;
+
+				torso.add(head);
+				torso.add(wing1);
+				torso.add(wing2);
+				torso.add(tail1);
+				tail1.add(tail2);
+
+				head.position.set(0, 0, 0.001);
+				wing2.position.set(.0014, -0.0005, 0.001);
+				wing1.position.set(-.0014, -0.0005, 0.001);
+				tail1.position.set(0, 0, -0.0014);
+				tail2.position.set(0, 0, -0.002);
+				wing1.rotation.y = Math.PI;
+				wing2.rotation.y = Math.PI;
+
+				torso.scale.setScalar(200);
+				scene.add(torso);
+				torso.position.set(0, 50, 0);
+				vel.set(0, 0, 0.5);
+			});
+			loader.load('tex/scene.gltf', (gltf) => {
+				const enviro = gltf.scene;
+
+				const box = new THREE.Box3().setFromObject(enviro);
+				const center = new THREE.Vector3();
+				box.getCenter(center);
+				enviro.position.sub(center);
+
+				enviro.scale.setScalar(500);
+				enviro.position.set(0, 0, 0);
+				scene.add(enviro);
+				enviro.traverse((child) => {
+					if (child.isMesh) groundMeshes.push(child);
+				});
+			});
+
+
+			const he = 1.222222
+			const w = 2.3 
+			const d = 0
+			const tex = new THREE.TextureLoader();
+			function texx(path) {
+				const t = tex.load(path, (texObj) => {
+					texObj.magFilter = THREE.NearestFilter;
+					texObj.minFilter = THREE.NearestFilter;
+					texObj.generateMipmaps = true;
+					texObj.needsUpdate = true;
+				});
+				return t;
+			}
+			const floor = texx('tx.png');
+			floor.wrapS = THREE.RepeatWrapping;
+			floor.wrapT = THREE.RepeatWrapping;
+			floor.repeat.set(100, 100)
+			const geo2 = new THREE.PlaneGeometry(1000, 1000);
+			const mat2 = new THREE.MeshStandardMaterial({ map: floor, 
+														 side: THREE.DoubleSide });
+			const flo = new THREE.Mesh(geo2, mat2);
+			flo.rotation.x = Math.PI / 2
+			flo.position.y = -0.2
+			//scene.add(flo);
+			const geo3 = new THREE.PlaneGeometry(1000, 1000);
+			const mat3 = new THREE.MeshStandardMaterial({ map: floor, 
+														 side: THREE.DoubleSide });
+			const flr = new THREE.Mesh(geo2, mat2);
+			flr.rotation.x = Math.PI / 2
+			flr.position.y = -0.3
+			//scene.add(flr);
+			const light = new THREE.AmbientLight(0xffffff, .3);
+			scene.add(light);
+			const light2 = new THREE.DirectionalLight(0xffffff, 1.5);
+			light2.position.set(0, 20, 0)
+			scene.add(light2)
+			const render = new THREE.WebGLRenderer();
+			// initial size
+			render.setSize(window.innerWidth, window.innerHeight);
+
+			// update camera and renderer when window is resized
+			window.addEventListener('resize', () => {
+				cam.aspect = window.innerWidth / window.innerHeight;
+				cam.updateProjectionMatrix();
+				render.setSize(window.innerWidth, window.innerHeight);
+			});
+
+			document.body.appendChild(render.domElement);
+			const keys = {};
+			window.addEventListener('keydown', (e) => {
+				keys[e.key] = true;
+			});
+			window.addEventListener('keyup', (e) => {
+				keys[e.key] = false
+			});
+			function land() {
+				seed = seed / 1.1;
+				vel.multiplyScalar(0.9);
+
+				// get dragon's actual world-space forward
+				const currentForward = new THREE.Vector3(0, 0, 1).applyQuaternion(torso.quaternion);
+
+				// project onto surface plane (not just world horizontal)
+				currentForward.addScaledVector(surfaceNormal, -currentForward.dot(surfaceNormal));
+
+				// fallback if dragon is pointing directly into the ground
+				if (currentForward.lengthSq() < 0.0001) {
+					currentForward.set(0, 0, 1);
+					currentForward.addScaledVector(surfaceNormal, -currentForward.dot(surfaceNormal));
+				}
+				currentForward.normalize();
+
+				// build a clean orthonormal basis from surface normal + projected forward
+				const right = new THREE.Vector3().crossVectors(surfaceNormal, currentForward).normalize();
+				const fwd   = new THREE.Vector3().crossVectors(right, surfaceNormal).normalize();
+
+				const targetQuat = new THREE.Quaternion().setFromRotationMatrix(
+					new THREE.Matrix4().makeBasis(right, surfaceNormal, fwd)
+				);
+
+				torso.quaternion.slerp(targetQuat, 0.1);
+
+				wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2) * 0.1;
+				wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2) * 0.1;
+				wing1.rotation.z += (0 - wing1.rotation.z) * 0.1;
+				wing2.rotation.z += (0 - wing2.rotation.z) * 0.1;
+			}
+
+
+
+
+
+			let angl = 0
+			let angly = 0.3
+			let speed = 16
+			let timer = 0
+
+			const paxis = new THREE.Vector3(1, 0, 0);
+			const yaxis = new THREE.Vector3(0, 1, 0);
+			const raxis = new THREE.Vector3(0, 0, 1);
+			const forw = new THREE.Vector3();
+			let vel = new THREE.Vector3();
+			const gravity = new THREE.Vector3(0, -0.004, 0); 
+			const up = new THREE.Vector3(0, 1, 0);  
+			const slow = 0.92;
+			const pow = 0.08;
+			const clock = new THREE.Clock();
+			const headpos = new THREE.Vector3();
+			let wingExposure = 1
+			let wingLift = 0
+			let rollAmt = 0
+			let pitchAmt = 0
+			const maxLift = 0.006
+			const wingDrag = 0.85
+			let seed = 0
+			const raycaster = new THREE.Raycaster();
+			const downDir = new THREE.Vector3(0, -1, 0);
+			let groundMeshes = []; 
+			let groundY = 0;
+			const minrot = 3.6
+			const maxrot = 4.6
+			let plus = 0
+			const surfaceNormal = new THREE.Vector3(0, 1, 0); 
+			let isFlying = true;
+
+
+
+			function anim() {
+				requestAnimationFrame(anim);
+				timer++;
+
+
+				//if (keys['ArrowRight']) angl -= 0.04;
+				//if (keys['ArrowLeft']) angl += 0.04;
+				//if (keys['ArrowUp']) angly = Math.min(angly + 0.04, Math.PI / 2 - 0.02);
+				//if (keys['ArrowDown']) angly = Math.max(angly - 0.04, -Math.PI / 2 + 0.02);
+				//if (keys['q']) head.rotation.y += 0.02;
+				//if (keys['e']) head.rotation.y -= 0.02;
+				if (torso) {
+					raycaster.set(
+						new THREE.Vector3(torso.position.x, torso.position.y + 200, torso.position.z),
+						downDir
+					);
+					const hits = raycaster.intersectObjects(groundMeshes, false);
+					if (hits.length > 0) {
+						groundY = hits[0].point.y;
+
+						const hitNormal = hits[0].face.normal.clone()
+							.transformDirection(hits[0].object.matrixWorld)
+							.normalize();
+
+						surfaceNormal.lerp(hitNormal, 0.15).normalize();
+					}
+
+
+					const onGround = torso.position.y <= groundY + 0.1;
+					// --- ROTATION ---
+					let rolling = 0;
+					let pitching = 0;
+					let yawing = 0;
+
+					if (keys['d']) { 
+						if (onGround) {
+							torso.rotateOnAxis(yaxis, -0.03);
+							yawing = -1
+						} else {
+							torso.rotateOnAxis(raxis,  0.08); 
+							rolling =   1; 
+						}
+					}
+					if (keys['a']) { 
+						if (onGround) {
+							torso.rotateOnAxis(yaxis, 0.03);
+							yawing = 1
+						} else {
+							torso.rotateOnAxis(raxis,  -0.08); 
+							rolling =   -1; 
+						}
+					}
+					if (keys['s']) { 
+						if (!onGround) {
+							torso.rotateOnAxis(paxis, -0.04 + (wing2.rotation.y - minrot - 0.3) * 0.02); 
+							pitching = -1; 
+						} else {
+							vel.addScaledVector(forw, -0.02);
+						}
+					}
+					if (keys['w']) { 
+						if (!onGround) {
+							torso.rotateOnAxis(paxis,  0.04 + (wing2.rotation.y - minrot - 0.3) * -0.02); 
+							pitching =  1; 
+						} else {
+							vel.addScaledVector(forw, 0.02);
+						}
+					}
+					if (keys[' ']) {
+						if (onGround && !isFlying) {
+							isFlying = true;
+							vel.addScaledVector(up, 1);
+							vel.addScaledVector(forw, 0.4);
+						} 
+					}
+
+					if (keys['j'] && !keys['k']) {
+						plus += (0.5 - plus) * 0.1;
+						if (plus > 0.49) plus = 0.5;
+					}
+					else if (keys['k']  && !keys['j']) {
+						plus += (-0.5 - plus) * 0.1;
+						if (plus < -0.49) plus = -0.5;
+					}
+					else {
+						plus *= 0.85; 
+						if (plus > -0.01 && plus < 0.01) plus = 0;
+					}
+					// --- PHYSICS ---
+					torso.getWorldDirection(forw);
+
+					const wingFactor = THREE.MathUtils.clamp(
+						(wing2.rotation.y - minrot) / (maxrot - minrot), 0, 1
+					);
+					const dragonUp = new THREE.Vector3(0, 1, 0).applyQuaternion(torso.quaternion);
+					const uprightness = THREE.MathUtils.clamp(dragonUp.dot(up), 0, 1);
+					const lift = uprightness * (1 - wingFactor);
+
+					vel.y -= 0.01 * (1 - lift);
+					if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.007));
+					vel.multiplyScalar(0.96);
+
+
+					const speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
+					vel.clampLength(0, speedCap);
+
+					torso.position.add(vel);
+
+					if (torso.position.y < groundY) {
+						torso.position.y = groundY;
+						isFlying = false; 
+						if (!(keys['w'] || keys['s'])) vel.set(vel.x * 0.8, vel.y * 0.8, vel.z * 0.8);
+					}
+					if (onGround) {
+						land();
+					} else {
+						seed = Math.sqrt(vel.x**2 + vel.y**2 + vel.z**2);
+					}
+
+
+
+
+					head.getWorldPosition(headpos)
+					const camB = new THREE.Vector3(0, 0, 1).applyQuaternion(torso.quaternion);
+					const camU = new THREE.Vector3(0, 1, 0).applyQuaternion(torso.quaternion);
+					const camt = headpos.clone()
+						.addScaledVector(camB, -7)
+						.addScaledVector(camU, 3);
+					cam.position.lerp(camt, 0.1);
+					cam.up.lerp(camU, 0.1);
+					cam.lookAt(headpos);
+					//--- ANIM ---
+					if (!onGround) {
+						wing2.rotation.y = Math.min(( seed * 2) + Math.PI + plus, 4.6);
+						wing1.rotation.y = Math.max((-seed * 2) - Math.PI - plus, -4.6);
+						wing1.rotation.z = ( Math.sin(timer / 13) / 2) * (0.6 - seed) * 2
+						wing2.rotation.z = (-Math.sin(timer / 13) / 2) * (0.6 - seed) * 2
+					}
+				}
+				sky.position.copy(cam.position);
+				render.render(scene, cam)
+
+			}
+			anim();
+		</script>
+	</body>
+</html> 
