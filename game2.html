@@ -253,11 +253,6 @@
 			        }
 			    }
 			}
-			for(const id in otherPlayers) {
-				const p = otherPlayers[id];
-				const d = cam.position.distanceTo(p.indicator.position);
-				p.indicator.scale.setScalar(d * 0.03)
-			}
 
 			const he = 1.222222
 			const w = 2.3 
@@ -456,7 +451,6 @@
 			function anim() {
 				requestAnimationFrame(anim);
 				updateChunks();
-				const fovFactor = 2 * Math.tan(THREE.MathUtils.degToRad(fov / 2));
 
 				timer++;
 
@@ -611,6 +605,7 @@
 					}
 				}
 				sky.position.copy(cam.position);
+				cam.updateMatrixWorld();
 				const fovFactor = 2 * Math.tan(THREE.MathUtils.degToRad(fov / 2));
 	            const desiredPixels = 22;
 	            for (const id in otherPlayers) {
