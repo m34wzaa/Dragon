@@ -379,23 +379,14 @@
 			    return sprite;
 			}
 
-			function makePlayerMesh(x, y, z, initialWing) {
+			function makePlayerMesh(x, y, z) {
 			    const clone = torso.clone();
 			    scene.add(clone);
 			    const indicator = makeIndicator();
 			    indicator.position.set(x, y + 2, z);
-			
-			    const headClone = clone.children[0];
-			    const w1 = clone.children[1];
-			    const w2 = clone.children[2];
-			
-			    if (headClone) headClone.rotation.set(0, 0, 0);
-			
-			    if (w2) w2.rotation.y =  (initialWing ?? Math.PI);
-			    if (w1) w1.rotation.y = -(initialWing ?? Math.PI);
-			
-			    return { mesh: clone, indicator, w1, w2 };
+			    return { mesh: clone, indicator };
 			}
+
 			
 
 			
@@ -713,13 +704,6 @@
 				cam.updateMatrixWorld();
 				const fovFactor = 2 * Math.tan(THREE.MathUtils.degToRad(fov / 2));
 	            const desiredPixels = 22;
-				for (const id in otherPlayers) {
-				    const p = otherPlayers[id];
-				    if (p.targetWing !== undefined) {
-				        if (p.w2) p.w2.rotation.y += ( p.targetWing - p.w2.rotation.y) * 0.07;
-				        if (p.w1) p.w1.rotation.y += (-p.targetWing - p.w1.rotation.y) * 0.07;
-				    }
-				}
 
 	            for (const id in otherPlayers) {
 	                const p = otherPlayers[id];
