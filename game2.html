@@ -486,7 +486,7 @@
 
 					if (keys['d']) { 
 						if (onGround) {
-							torso.rotateOnAxis(yaxis, -0.015);
+							torso.rotateOnAxis(yaxis, -0.03);
 							yawing = -1
 						} else {
 							torso.rotateOnAxis(raxis,  0.04); 
@@ -495,7 +495,7 @@
 					}
 					if (keys['a']) { 
 						if (onGround) {
-							torso.rotateOnAxis(yaxis, 0.015);
+							torso.rotateOnAxis(yaxis, 0.03);
 							yawing = 1
 						} else {
 							torso.rotateOnAxis(raxis,  -0.04); 
@@ -549,7 +549,7 @@
 					const lift = uprightness * (1 - wingFactor);
 
 					vel.y -= 0.01 * (1 - lift);
-					if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.007));
+					if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.06));
 					vel.multiplyScalar(0.96);
 					let speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
 					if (keys['k'] && !keys['j']) speedCap = THREE.MathUtils.lerp(1.5, 0.25, wingFactor);
