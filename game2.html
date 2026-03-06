@@ -650,7 +650,7 @@
 					head.getWorldPosition(headpos)
 					document.getElementById('coords').textContent =`X: ${torso.position.x.toFixed(0)}  Y: ${torso.position.y.toFixed(0)}  Z: ${torso.position.z.toFixed(0)}`;
 					// send position to server every frame
-					if (socket.readyState === 1 && myId && torso) {
+					if (socket.readyState === 1 && myId && torso && gameStarted) {
 					    const q = torso.quaternion;
 					    socket.send(JSON.stringify({
 					        type: 'move',
