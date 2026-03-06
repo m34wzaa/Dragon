@@ -148,8 +148,8 @@
 				loadGLB('tex2/torso2.glb'),
 				loadGLB('tex2/tail12.glb'),
 				loadGLB('tex2/tail22.glb'),
-				loadGLB('tex2/wing12.glb'),
 				loadGLB('tex2/wing22.glb'),
+				loadGLB('tex2/wing12.glb'),
 			]).then(([h, to, t1, t2, w1, w2]) => {
 				head = h; torso = to;
 				tail1 = t1; tail2 = t2;
@@ -161,11 +161,11 @@
 				torso.add(tail1);
 				tail1.add(tail2);
 
-				head.position.set(0, 0, 0.001);
+				head.position.set(0, 0, -0.001);
 				wing2.position.set(.0014, -0.0005, 0.001);
 				wing1.position.set(-.0014, -0.0005, 0.001);
-				tail1.position.set(0, 0, -0.0014);
-				tail2.position.set(0, 0, -0.002);
+				tail1.position.set(0, 0, -0.002);
+				tail2.position.set(0, 0, -0.003);
 				wing1.rotation.y = Math.PI;
 				wing2.rotation.y = Math.PI;
 
