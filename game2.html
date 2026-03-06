@@ -115,8 +115,8 @@
 			const scene = new THREE.Scene();
 			let vel = new THREE.Vector3();
 			scene.background = new THREE.Color(0x222222);
-			let dist = 5000;
-			scene.fog = new THREE.Fog(0x222222, dist - (dist * 0.4), dist);
+			let dist = 1000;
+			scene.fog = new THREE.Fog(0x222222, dist - (dist * 0.3), dist);
 			let fov = 90;
 			const cam = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.01, dist);
 			cam.position.z = 90;
@@ -227,7 +227,7 @@
 			let gameStarted = false;
 			const CHUNK_SIZE = 100;
 			const CHUNK_SEGS = 50;
-			const VIEW_DIST  = 10; 
+			const VIEW_DIST  = 12; 
 			const chunks = {};
 			
 			function chunkKey(cx, cz) { return `${cx},${cz}`; }
