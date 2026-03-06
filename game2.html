@@ -399,7 +399,7 @@
 			    if (msg.id === myId) return;
 			
 			    if (msg.type === 'move') {
-					if (msg.worldSeed !== WORLD_SEED) {
+				    if (msg.worldSeed !== WORLD_SEED) {
 				        if (otherPlayers[msg.id]) {
 				            scene.remove(otherPlayers[msg.id].mesh);
 				            scene.remove(otherPlayers[msg.id].indicator);
@@ -408,15 +408,16 @@
 				        }
 				        return;
 				    }
-				    if (!otherPlayers[msg.id]) {
-				        if (!torso) return;
-				        otherPlayers[msg.id] = makePlayerMesh(msg.pos.x, msg.pos.y, msg.pos.z); // ← pass pos
+				    if (!otherPlayers[msg.id] && torso) { // ← combined into one clean check
+				        otherPlayers[msg.id] = makePlayerMesh(msg.pos.x, msg.pos.y, msg.pos.z);
 				    }
+				    if (!otherPlayers[msg.id]) return; // torso not ready yet, try next frame
 				    const p = otherPlayers[msg.id];
 				    p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
 				    p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
 				    p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
 				}
+
 
 			
 			    if (msg.type === 'leave' && otherPlayers[msg.id]) {
