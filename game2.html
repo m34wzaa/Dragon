@@ -417,8 +417,8 @@
 				    const p = otherPlayers[msg.id];
 					p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
 					p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
-					if (p.w2) p.w2.rotation.y += ( msg.wing - p.w2.rotation.y) * 0.2;
-					if (p.w1) p.w1.rotation.y += (-msg.wing - p.w1.rotation.y) * 0.2;
+					p.targetWing = msg.wing;
+					p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
 				    p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
 				}
 
@@ -705,6 +705,14 @@
 				cam.updateMatrixWorld();
 				const fovFactor = 2 * Math.tan(THREE.MathUtils.degToRad(fov / 2));
 	            const desiredPixels = 22;
+				for (const id in otherPlayers) {
+				    const p = otherPlayers[id];
+				    if (p.targetWing !== undefined) {
+				        if (p.w2) p.w2.rotation.y += ( p.targetWing - p.w2.rotation.y) * 0.07;
+				        if (p.w1) p.w1.rotation.y += (-p.targetWing - p.w1.rotation.y) * 0.07;
+				    }
+				}
+
 	            for (const id in otherPlayers) {
 	                const p = otherPlayers[id];
 	                const d = cam.position.distanceTo(p.indicator.position);
