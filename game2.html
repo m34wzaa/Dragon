@@ -169,9 +169,9 @@
 			});*/
 			const WORLD_SEED = 1;
 			const perlin2 = createNoise(WORLD_SEED);
-			const CHUNK_SIZE = 1000;
+			const CHUNK_SIZE = 100;
 			const CHUNK_SEGS = 50;
-			const VIEW_DIST  = 1; 
+			const VIEW_DIST  = 3; 
 			const chunks = {};
 			
 			function chunkKey(cx, cz) { return `${cx},${cz}`; }
@@ -186,17 +186,17 @@
 			        const wz = pos.getZ(i) + cz * CHUNK_SIZE; // world z
 			
 					const raw =
-					    perlin2(wx * 0.0008, wz * 0.0008) * 1.0 +
-					    perlin2(wx * 0.003,  wz * 0.003)  * 0.3 +
-					    perlin2(wx * 0.01,   wz * 0.01)   * 0.08;
+					    perlin2(wx * 0.003, wz * 0.003) * 1.0 +
+						perlin2(wx * 0.012, wz * 0.012) * 0.3 +
+						perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
 					
 					// shift raw up so it's always positive (range was ~-1.4 to 1.4, now 0 to 2.8)
 					const shifted = raw + 1.4;
 					
 					// sharpen peaks without creating hard cliffs
-					const sharp = Math.pow(shifted / 2.8, 3.5) * 2.8;
+					const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
 					
-					const h = sharp * 350;
+					const h = sharp * 500;
 
 			
 			        pos.setY(i, h);
