@@ -653,7 +653,7 @@
 					    const q = torso.quaternion;
 					    socket.send(JSON.stringify({
 					        type: 'move',
-							worldSeed: WORLD_SEED
+							worldSeed: WORLD_SEED,
 					        pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
 					        quat: { x: q.x, y: q.y, z: q.z, w: q.w },
 					        vel:  { x: vel.x, y: vel.y, z: vel.z },
