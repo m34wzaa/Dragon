@@ -399,7 +399,9 @@
 			    if (msg.id === myId) return;
 			
 			    if (msg.type === 'move') {
+					console.log('received move, their seed:', msg.worldSeed, 'my seed:', WORLD_SEED); // ← add this
 				    if (msg.worldSeed !== WORLD_SEED) {
+						console.log('filtered out', msg.id);
 				        if (otherPlayers[msg.id]) {
 				            scene.remove(otherPlayers[msg.id].mesh);
 				            scene.remove(otherPlayers[msg.id].indicator);
