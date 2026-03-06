@@ -60,7 +60,7 @@
 			const scene = new THREE.Scene();
 			let vel = new THREE.Vector3();
 			scene.background = new THREE.Color(0x222222);
-			let dist = 500;
+			let dist = 5000;
 			scene.fog = new THREE.Fog(0x222222, dist - (dist * 0.4), dist);
 			let fov = 60;
 			const cam = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.01, dist);
@@ -102,29 +102,6 @@
 
 			const n = 0
 			const loader = new GLTFLoader();
-			function wall(x, y, z, rot) {
-				loader.load('mount.glb', (gltf) => {
-					const mount = gltf.scene;
-
-					const box = new THREE.Box3().setFromObject(mount);
-					const size = new THREE.Vector3();
-					const center = new THREE.Vector3();
-					box.getSize(size);
-					box.getCenter(center);
-
-					mount.position.sub(center);
-
-					const maxDim = Math.max(size.x, size.y, size.z);
-					const scale = 3 / maxDim;
-					mount.scale.setScalar(scale);
-
-					scene.add(mount);
-					mount.position.z = z
-					mount.position.y = y
-					mount.position.x = x
-					mount.rotation.y = rot * (Math.PI / 180)
-				});
-			}
 			// dragon parts
 			let head, torso, tail1, tail2, wing1, wing2;
 
@@ -277,9 +254,6 @@
 			    }
 			}
 
-
-
-
 			const he = 1.222222
 			const w = 2.3 
 			const d = 0
@@ -321,42 +295,72 @@
 			const otherPlayers = {};
 			const socket = new WebSocket('wss://dragon-production-988c.up.railway.app');
 			
+			function makeIndicator() {
+			    const canvas = document.createElement('canvas');
+			    canvas.width = 64; canvas.height = 64;
+			    const ctx = canvas.getContext('2d');
 			
+			    // Downward-pointing arrow
+			    ctx.fillStyle = '#00eeff';
+			    ctx.shadowColor = '#00eeff';
+			    ctx.shadowBlur = 10;
+			    ctx.beginPath();
+			    ctx.moveTo(32, 54);   // tip
+			    ctx.lineTo(10, 14);   // top-left
+			    ctx.lineTo(54, 14);   // top-right
+			    ctx.closePath();
+			    ctx.fill();
+			
+			    const texture = new THREE.CanvasTexture(canvas);
+			    const mat = new THREE.SpriteMaterial({
+			        map: texture,
+			        depthTest: false,      // always renders on top, never hidden by terrain
+			        transparent: true
+			    });
+			    const sprite = new THREE.Sprite(mat);
+			    sprite.scale.setScalar(15); // tweak this to change indicator size
+			    scene.add(sprite);
+			    return sprite;
+			}
+
 			function makePlayerMesh() {
 			    const clone = torso.clone();
 			    clone.scale.setScalar(200);
 			    scene.add(clone);
-			    return clone;
+				const i = makeIndicator();
+			    return { mesh: clone, i };
 			}
 
 			
 			socket.addEventListener('message', (e) => {
-				const msg = JSON.parse(e.data);
+			    const msg = JSON.parse(e.data);
 			
-				if (msg.type === 'init') {
-					myId = msg.id;
-				}
+			    if (msg.type === 'init') {
+			        myId = msg.id;
+			    }
 			
-				if (msg.id === myId) return;
+			    if (msg.id === myId) return;
 			
-				if (msg.type === 'move') {
-					if (!otherPlayers[msg.id]) {
-						if (!torso) return; // wait until torso is loaded
-						otherPlayers[msg.id] = makePlayerMesh();
-					}
-					const p = otherPlayers[msg.id];
-					p.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
-					p.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
-				}
+			    if (msg.type === 'move') {
+			        if (!otherPlayers[msg.id]) {
+			            if (!torso) return;
+			            otherPlayers[msg.id] = makePlayerMesh();
+			        }
+			        const p = otherPlayers[msg.id];
+			        p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
+			        p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
 			
-				if (msg.type === 'leave' && otherPlayers[msg.id]) {
-					scene.remove(otherPlayers[msg.id]);
-					delete otherPlayers[msg.id];
-				}
+			        // Keep indicator floating above the dragon
+			        p.indicator.position.set(msg.pos.x, msg.pos.y + 20, msg.pos.z);
+			    }
+			
+			    if (msg.type === 'leave' && otherPlayers[msg.id]) {
+			        scene.remove(otherPlayers[msg.id].mesh);
+			        scene.remove(otherPlayers[msg.id].indicator);
+			        otherPlayers[msg.id].indicator.material.dispose();
+			        delete otherPlayers[msg.id];
+			    }
 			});
-
-
-
 
 			render.setSize(window.innerWidth, window.innerHeight);
 
@@ -442,6 +446,8 @@
 
 
 
+
+			
 			function anim() {
 				requestAnimationFrame(anim);
 				updateChunks();
