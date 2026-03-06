@@ -385,8 +385,8 @@
 			    scene.add(clone);
 			    const indicator = makeIndicator();
 			    indicator.position.set(x, y + 2, z); 
-				const w1 = clone.children[0]
-				const w2 = clone.children[1]
+				const w1 = clone.children[1]
+				const w2 = clone.children[2]
 			    return { mesh: clone, indicator, w1, w2 };
 			}
 
@@ -419,17 +419,6 @@
 					p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
 					if (p.w2) p.w2.rotation.y += (msg.wing - p.w2.rotation.y) * 0.2;
 					if (p.w1) p.w1.rotation.y += (-msg.wing + 2 * Math.PI - p.w1.rotation.y) * 0.2
-					
-					p.mesh.traverse((child) => {
-						if (child !== p.mesh) {
-							if (child.position.x < 0 && child.position.z !== 0) {
-								child.rotation.y += (Math.min((msg.seed * 2) + Math.PI, 4.6) - child.rotation.y) * 0.2;
-							}
-							if (child.position.x > 0 && child.position.z !== 0) {
-								child.rotation.y += (Math.max((-msg.seed * 2) - Math.PI, -4.6) - child.rotation.y) * 0.2;
-							}
-						}
-					});
 				    p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
 				}
 
