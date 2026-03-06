@@ -253,6 +253,11 @@
 			        }
 			    }
 			}
+			for(const id in otherPlayers) {
+				const p = otherPlayers[id];
+				const d = cam.position.distanceTo(p.indicator.position);
+				p.indicator.scale.setScalar(d * 0.03)
+			}
 
 			const he = 1.222222
 			const w = 2.3 
@@ -323,11 +328,12 @@
 			    return sprite;
 			}
 
-			function makePlayerMesh() {
+			function makePlayerMesh(x, y, z) {
 			    const clone = torso.clone();
 			    clone.scale.setScalar(200);
 			    scene.add(clone);
-				const indicator = makeIndicator();
+			    const indicator = makeIndicator();
+			    indicator.position.set(x, y + 20, z); 
 			    return { mesh: clone, indicator };
 			}
 
@@ -342,17 +348,16 @@
 			    if (msg.id === myId) return;
 			
 			    if (msg.type === 'move') {
-			        if (!otherPlayers[msg.id]) {
-			            if (!torso) return;
-			            otherPlayers[msg.id] = makePlayerMesh();
-			        }
-			        const p = otherPlayers[msg.id];
-			        p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
-			        p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
-			
-			        // Keep indicator floating above the dragon
-			        p.indicator.position.set(msg.pos.x, msg.pos.y + 20, msg.pos.z);
-			    }
+				    if (!otherPlayers[msg.id]) {
+				        if (!torso) return;
+				        otherPlayers[msg.id] = makePlayerMesh(msg.pos.x, msg.pos.y, msg.pos.z); // ← pass pos
+				    }
+				    const p = otherPlayers[msg.id];
+				    p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
+				    p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
+				    p.indicator.position.set(msg.pos.x, msg.pos.y + 20, msg.pos.z);
+				}
+
 			
 			    if (msg.type === 'leave' && otherPlayers[msg.id]) {
 			        scene.remove(otherPlayers[msg.id].mesh);
