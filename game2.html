@@ -456,6 +456,22 @@
 			function anim() {
 				requestAnimationFrame(anim);
 				updateChunks();
+				const fovFactor = 2 * Math.tan(THREE.MathUtils.degToRad(fov / 2));
+				const desiredPixels = 22; // screen size in pixels — shrink/grow this
+				
+				for (const id in otherPlayers) {
+				    const p = otherPlayers[id];
+				
+				    // Correct constant screen size using FOV
+				    const d = cam.position.distanceTo(p.indicator.position);
+				    p.indicator.scale.setScalar(fovFactor * d * desiredPixels / window.innerHeight);
+				
+				    // Lock arrow to always point world-down regardless of camera roll
+				    const worldDown = new THREE.Vector3(0, -1, 0);
+				    worldDown.transformDirection(cam.matrixWorldInverse);
+				    p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
+				}
+
 				timer++;
 
 
