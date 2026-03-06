@@ -417,8 +417,8 @@
 				    const p = otherPlayers[msg.id];
 					p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
 					p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
-					if (p.w2) p.w2.rotation.y += (msg.wing - p.w2.rotation.y) * 0.2;
-					if (p.w1) p.w1.rotation.y += (-msg.wing + 2 * Math.PI - p.w1.rotation.y) * 0.2
+					if (p.w2) p.w2.rotation.y += ( msg.wing - p.w2.rotation.y) * 0.2;
+					if (p.w1) p.w1.rotation.y += (-msg.wing - p.w1.rotation.y) * 0.2;
 				    p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
 				}
 
