@@ -328,7 +328,7 @@
 			    clone.scale.setScalar(200);
 			    scene.add(clone);
 			    const indicator = makeIndicator();
-			    indicator.position.set(x, y + 20, z); 
+			    indicator.position.set(x, y + 2, z); 
 			    return { mesh: clone, indicator };
 			}
 
@@ -350,7 +350,7 @@
 				    const p = otherPlayers[msg.id];
 				    p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
 				    p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
-				    p.indicator.position.set(msg.pos.x, msg.pos.y + 20, msg.pos.z);
+				    p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
 				}
 
 			
