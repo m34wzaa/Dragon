@@ -370,25 +370,33 @@
 			    const texture = new THREE.CanvasTexture(canvas);
 			    const mat = new THREE.SpriteMaterial({
 			        map: texture,
-			        depthTest: false,      // always renders on top, never hidden by terrain
+			        depthTest: false,
 			        transparent: true
 			    });
 			    const sprite = new THREE.Sprite(mat);
-			    sprite.scale.setScalar(15); // tweak this to change indicator size
+			    sprite.scale.setScalar(10); 
 			    scene.add(sprite);
 			    return sprite;
 			}
 
-			function makePlayerMesh(x, y, z) {
+			function makePlayerMesh(x, y, z, initialWing) {
 			    const clone = torso.clone();
-			    clone.scale.setScalar(200);
 			    scene.add(clone);
 			    const indicator = makeIndicator();
-			    indicator.position.set(x, y + 2, z); 
-				const w1 = clone.children[1]
-				const w2 = clone.children[2]
+			    indicator.position.set(x, y + 2, z);
+			
+			    const headClone = clone.children[0];
+			    const w1 = clone.children[1];
+			    const w2 = clone.children[2];
+			
+			    if (headClone) headClone.rotation.set(0, 0, 0);
+			
+			    if (w2) w2.rotation.y =  (initialWing ?? Math.PI);
+			    if (w1) w1.rotation.y = -(initialWing ?? Math.PI);
+			
 			    return { mesh: clone, indicator, w1, w2 };
 			}
+			
 
 			
 			socket.addEventListener('message', (e) => {
