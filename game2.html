@@ -11,9 +11,64 @@
 				padding: 0;
 				overflow: hidden;
 			}
+			#hud {
+			    position: fixed;
+			    top: 10px;
+			    left: 10px;
+			    color: #00eeff;
+			    font-family: monospace;
+			    font-size: 13px;
+			    pointer-events: none;
+			    text-shadow: 0 0 4px #000;
+			    z-index: 10;
+			}
+			#startScreen {
+			    position: fixed;
+			    inset: 0;
+			    background: rgba(0,0,0,0.88);
+			    display: flex;
+			    flex-direction: column;
+			    align-items: center;
+			    justify-content: center;
+			    z-index: 100;
+			    color: #fff;
+			    font-family: monospace;
+			    gap: 14px;
+			}
+			#startScreen input {
+			    padding: 6px 12px;
+			    font-size: 18px;
+			    background: #111;
+			    color: #00eeff;
+			    border: 1px solid #00eeff;
+			    outline: none;
+			    text-align: center;
+			    width: 120px;
+			}
+			#startScreen button {
+			    padding: 8px 28px;
+			    background: #00eeff;
+			    color: #000;
+			    border: none;
+			    cursor: pointer;
+			    font-size: 15px;
+			    font-family: monospace;
+			}
+
 		</style>
 	</head>
 	<body>
+		<div id="startScreen">
+		    <h2>gaem for novivuvuvuvuvus</h2>
+		    <label>seed</label>
+		    <input id="seedInput" type="number" value="1" min="1">
+		    <button id="playBtn">join</button>
+		</div>
+		<div id="hud">
+		    <div id="coords">x: 0 &nbsp; y: 0 &nbsp; z: 0</div>
+		    <div id="seedDisplay">Seed: 1</div>
+		</div>
+
 		<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
 		<script type="importmap">
 			{
@@ -167,8 +222,9 @@
 					if (child.isMesh) groundMeshes.push(child);
 				});
 			});*/
-			const WORLD_SEED = 1;
-			const perlin2 = createNoise(WORLD_SEED);
+			let WORLD_SEED = 1;
+			let perlin2 = null;
+			let gameStarted = false;
 			const CHUNK_SIZE = 100;
 			const CHUNK_SEGS = 50;
 			const VIEW_DIST  = 10; 
@@ -229,7 +285,7 @@
 			}
 			
 			function updateChunks() {
-			    if (!torso) return;
+			    if (!torso || !gameStarted || !perlin2) return;
 			
 			    const cx = Math.round(torso.position.x / CHUNK_SIZE);
 			    const cz = Math.round(torso.position.z / CHUNK_SIZE);
@@ -343,6 +399,15 @@
 			    if (msg.id === myId) return;
 			
 			    if (msg.type === 'move') {
+					if (msg.worldSeed !== WORLD_SEED) {
+				        if (otherPlayers[msg.id]) {
+				            scene.remove(otherPlayers[msg.id].mesh);
+				            scene.remove(otherPlayers[msg.id].indicator);
+				            otherPlayers[msg.id].indicator.material.dispose();
+				            delete otherPlayers[msg.id];
+				        }
+				        return;
+				    }
 				    if (!otherPlayers[msg.id]) {
 				        if (!torso) return;
 				        otherPlayers[msg.id] = makePlayerMesh(msg.pos.x, msg.pos.y, msg.pos.z); // ← pass pos
@@ -407,6 +472,14 @@
 				wing1.rotation.z += (0 - wing1.rotation.z) * 0.1;
 				wing2.rotation.z += (0 - wing2.rotation.z) * 0.1;
 			}
+			document.getElementById('playBtn').addEventListener('click', () => {
+			    WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
+			    perlin2 = createNoise(WORLD_SEED);
+			    document.getElementById('startScreen').style.display = 'none';
+			    document.getElementById('seedDisplay').textContent = 'Seed: ' + WORLD_SEED;
+			    gameStarted = true;
+			});
+
 
 
 
@@ -574,11 +647,13 @@
 
 
 					head.getWorldPosition(headpos)
+					document.getElementById('coords').textContent =`X: ${torso.position.x.toFixed(0)}  Y: ${torso.position.y.toFixed(0)}  Z: ${torso.position.z.toFixed(0)}`;
 					// send position to server every frame
 					if (socket.readyState === 1 && myId && torso) {
 					    const q = torso.quaternion;
 					    socket.send(JSON.stringify({
 					        type: 'move',
+							worldSeed: WORLD_SEED
 					        pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
 					        quat: { x: q.x, y: q.y, z: q.z, w: q.w },
 					        vel:  { x: vel.x, y: vel.y, z: vel.z },
