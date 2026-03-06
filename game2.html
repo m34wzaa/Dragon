@@ -551,10 +551,9 @@
 					vel.y -= 0.01 * (1 - lift);
 					if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.007));
 					vel.multiplyScalar(0.96);
-					if (keys['k']) const speedCap = THREE.MathUtils.lerp(1.5, 0.25, wingFactor);
-					if (keys['j']) const speedCap = THREE.MathUtils.lerp(6.0, 1, wingFactor);
-					if (!keys['j'] && !keys['k']) const speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
-					if (keys['j'] && keys['k']) const speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
+					let speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
+					if (keys['k'] && !keys['j']) speedCap = THREE.MathUtils.lerp(1.5, 0.25, wingFactor);
+					if (keys['j'] && !keys['k']) speedCap = THREE.MathUtils.lerp(6.0, 1, wingFactor);
 					
 					vel.clampLength(0, speedCap);
 
