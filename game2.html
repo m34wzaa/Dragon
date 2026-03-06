@@ -507,6 +507,8 @@
 			let pitchAmt = 0
 			const maxLift = 0.006
 			const wingDrag = 0.85
+			let flapPhase = 0;
+			let flapSpeed = 0.08;
 			let seed = 0
 			const raycaster = new THREE.Raycaster();
 			const downDir = new THREE.Vector3(0, -1, 0);
@@ -675,11 +677,25 @@
 					cam.lookAt(headpos);
 					//--- ANIM ---
 					if (!onGround) {
-						wing2.rotation.y = Math.min(( seed * 2) + Math.PI + plus, 4.6);
-						wing1.rotation.y = Math.max((-seed * 2) - Math.PI - plus, -4.6);
-						wing1.rotation.z = ( Math.sin(timer / 13) / 2) * (0.6 - seed) * 2
-						wing2.rotation.z = (-Math.sin(timer / 13) / 2) * (0.6 - seed) * 2
+					    // smooth flap speed — faster when boosting with J, slower when braking with K
+					    const targetFlapSpeed = 0.05 + seed * 0.07 + plus * 0.05;
+					    flapSpeed += (targetFlapSpeed - flapSpeed) * 0.04;
+					    flapPhase += flapSpeed;
+					
+					    // smooth wing fold — lerp toward target instead of snapping
+					    const targetY2 = Math.min((seed * 2) + Math.PI + plus, 4.6);
+					    const targetY1 = Math.max((-seed * 2) - Math.PI - plus, -4.6);
+					    wing2.rotation.y += (targetY2 - wing2.rotation.y) * 0.07;
+					    wing1.rotation.y += (targetY1 - wing1.rotation.y) * 0.07;
+					
+					    // flap amplitude — bigger when slow or boosting, fades at high speed
+					    const flapAmp = Math.max(0, (0.55 - seed + plus * 0.25)) * 0.9;
+					    const flapTarget1 =  Math.sin(flapPhase) * flapAmp;
+					    const flapTarget2 = -Math.sin(flapPhase) * flapAmp;
+					    wing1.rotation.z += (flapTarget1 - wing1.rotation.z) * 0.12;
+					    wing2.rotation.z += (flapTarget2 - wing2.rotation.z) * 0.12;
 					}
+
 				}
 				sky.position.copy(cam.position);
 				cam.updateMatrixWorld();
