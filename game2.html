@@ -371,8 +371,8 @@
 			            if (turns % 2 === 0) step++;
 			        }
 			
-			        // yield every 500 steps so the game keeps running
-			        if ((x * x + z * z) % 15000 === 0) {
+			        if (++batch >= 50000) {
+			            batch = 0;
 			            await new Promise(r => setTimeout(r, 0));
 			        }
 			    }
