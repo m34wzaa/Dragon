@@ -572,7 +572,6 @@
 			document.getElementById('playBtn').addEventListener('click', () => {
 			    WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
 			    perlin2 = createNoise(WORLD_SEED);
-				findPeak();
 			    document.getElementById('startScreen').style.display = 'none';
 			    document.getElementById('seedDisplay').textContent = 'Seed: ' + WORLD_SEED;
 			    gameStarted = true;
