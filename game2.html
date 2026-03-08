@@ -382,7 +382,7 @@
 			            if (turns % 2 === 0) step++;
 			        }
 			
-			        if (++batch >= 50000) {
+			        if (++batch >= 500000) {
 			            batch = 0;
 			            await new Promise(r => setTimeout(r, 0));
 			        }
