@@ -499,6 +499,28 @@
 			    return { mesh: clone, indicator };
 			}
 
+			function spawnOnGround() {
+			    if (!torso) {
+			        setTimeout(spawnOnGround, 50); // torso not loaded yet, try again
+			        return;
+			    }
+			
+			    // sample the height formula directly — no chunks needed
+			    const wx = 0, wz = 0;
+			    const raw =
+			        perlin2(wx * 0.003, wz * 0.003) * 1.0 +
+			        perlin2(wx * 0.012, wz * 0.012) * 0.3 +
+			        perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
+			    const shifted = raw + 1.4;
+			    const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
+			    const spawnY = sharp * 500;
+			
+			    torso.position.set(0, spawnY, 0);
+			    vel.set(0, 0, 0);
+			    isFlying = false;
+			}
+
+
 			
 
 			
@@ -595,6 +617,7 @@
 			    document.getElementById('seedDisplay').textContent = 'Seed: ' + WORLD_SEED;
 			    gameStarted = true;
 				findPeak();
+				spawnOnGround();
 			});
 
 
