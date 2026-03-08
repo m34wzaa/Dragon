@@ -194,31 +194,47 @@
 				loadGLB('tex2/tail22.glb'),
 				loadGLB('tex2/wing12.glb'),
 				loadGLB('tex2/wing22.glb'),
-			]).then(([h, to, t1, t2, w1, w2]) => {
-				head = h; torso = to;
-				tail1 = t1; tail2 = t2;
-				wing1 = w1; wing2 = w2;
-
-				torso.add(head);
-				torso.add(wing1);
-				torso.add(wing2);
-				torso.add(tail1);
-				tail1.add(tail2);
-				
-				head.position.set(0, 0, -0.001);
-				head.scale.setScalar(0.7);
-				wing2.position.set(-.0014, -0.0005, -0.001);
-				wing1.position.set(.0014, -0.0005, -0.001);
-				tail1.position.set(0, 0, -0.002);
-				tail2.position.set(0, 0, -0.003);
-				wing1.rotation.y = Math.PI;
-				wing2.rotation.y = Math.PI;
-
-				torso.scale.setScalar(200);
-				scene.add(torso);
-				torso.position.set(0, 500, 0);
-				vel.set(0, 0, -0.5);
+			}).then(([h, to, t1, t2, w1, w2]) => {
+			    head = h; torso = to;
+			    tail1 = t1; tail2 = t2;
+			    wing1 = w1; wing2 = w2;
+			
+			    torso.add(head);
+			    torso.add(wing1);
+			    torso.add(wing2);
+			    torso.add(tail1);
+			    tail1.add(tail2);
+			    
+			    head.position.set(0, 0, -0.001);
+			    head.scale.setScalar(0.7);
+			    wing2.position.set(-.0014, -0.0005, -0.001);
+			    wing1.position.set(.0014, -0.0005, -0.001);
+			    tail1.position.set(0, 0, -0.002);
+			    tail2.position.set(0, 0, -0.003);
+			    wing1.rotation.y = Math.PI;
+			    wing2.rotation.y = Math.PI;
+			
+			    torso.scale.setScalar(200);
+			    scene.add(torso);
+			
+			    // ← replace the hardcoded position and vel with this:
+			    if (perlin2) {
+			        const raw =
+			            perlin2(0 * 0.003, 0 * 0.003) * 1.0 +
+			            perlin2(0 * 0.012, 0 * 0.012) * 0.3 +
+			            perlin2(0 * 0.04,  0 * 0.04)  * 0.08;
+			        const shifted = raw + 1.4;
+			        const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
+			        const spawnY = sharp * 500;
+			        torso.position.set(0, spawnY, 0);
+			        groundY = spawnY;
+			        isFlying = false;
+			    } else {
+			        torso.position.set(0, 500, 0); // fallback if joined before seed set
+			    }
+			    vel.set(0, 0, 0);
 			});
+
 			/*loader.load('tex/scene.gltf', (gltf) => {
 				const enviro = gltf.scene;
 
@@ -499,27 +515,6 @@
 			    return { mesh: clone, indicator };
 			}
 
-			function spawnOnGround() {
-			    if (!torso || !perlin2) {
-			        setTimeout(spawnOnGround, 50);
-			        return;
-			    }
-			
-			    const wx = 0, wz = 0;
-			    const raw =
-			        perlin2(wx * 0.003, wz * 0.003) * 1.0 +
-			        perlin2(wx * 0.012, wz * 0.012) * 0.3 +
-			        perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
-			    const shifted = raw + 1.4;
-			    const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
-			    const spawnY = sharp * 500;
-			
-			    torso.position.set(0, spawnY, 0);
-			    groundY = spawnY;      // tell the physics the ground is here
-			    vel.set(0, 0, 0);      // kill all momentum including the -0.5 z set by GLB loader
-			    isFlying = true;
-			}
-
 
 
 			
@@ -618,7 +613,6 @@
 			    document.getElementById('seedDisplay').textContent = 'Seed: ' + WORLD_SEED;
 			    gameStarted = true;
 				findPeak();
-				spawnOnGround();
 			});
 
 
