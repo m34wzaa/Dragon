@@ -244,7 +244,7 @@
 			let gameStarted = false;
 			const CHUNK_SIZE = 100;
 			const CHUNK_SEGS = 50;
-			const VIEW_DIST  = 20; 
+			const VIEW_DIST  = 12; 
 			const chunks = {};
 			
 			function chunkKey(cx, cz) { return `${cx},${cz}`; }
@@ -387,7 +387,7 @@
 			            if (turns % 2 === 0) step++;
 			        }
 			
-			        if (++batch >= 200000) {
+			        if (++batch >= 20000) {
 			            batch = 0;
 			            await new Promise(r => setTimeout(r, 0));
 			        }
