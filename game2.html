@@ -333,13 +333,48 @@
 			    }
 			}
 
-			async function findPeak() {
-			    const step = 1;
-			    const range = 20000;
-			    document.getElementById('peakDisplay').textContent = `Peak: searching...`;
+			let peakSearchRadius = 0;
+			const PEAK_SEARCH_STEP = 100;
+			const PEAK_SEARCH_RING = 1200; // how far each async tick expands
 			
-			    for (let wx = -range; wx <= range; wx += step) {
-			        for (let wz = -range; wz <= range; wz += step) {
+			async function findPeak() {
+			    document.getElementById('peakDisplay').textContent = `Peak: searching...`;
+			    peakSearchRadius = 0;
+			
+			    while (true) {
+			        const r = peakSearchRadius;
+			        // scan the border ring at this radius
+			        for (let wx = -r; wx <= r; wx += PEAK_SEARCH_STEP) {
+			            for (let wz = -r; wz <= r; wz += PEAK_SEARCH_STEP) {
+			                // only scan the outer edge of this ring, not the interior (already done)
+			                if (Math.abs(wx) !== r && Math.abs(wz) !== r) continue;
+			                const raw =
+			                    perlin2(wx * 0.003, wz * 0.003) * 1.0 +
+			                    perlin2(wx * 0.012, wz * 0.012) * 0.3 +
+			                    perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
+			                const shifted = raw + 1.4;
+			                const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
+			                const h = sharp * 500;
+			                if (h > peakY) {
+			                    peakY = h;
+			                    peakX = wx;
+			                    peakZ = wz;
+			                    document.getElementById('peakDisplay').textContent =
+			                        `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
+								refinePeak();
+			                }
+			            }
+			        }
+			        peakSearchRadius += PEAK_SEARCH_RING;
+			        await new Promise(r => setTimeout(r, 0));
+			    }
+			}
+			async function refinePeak() {
+			    const step = 1;
+			    const margin = 200;
+			    const refineX = peakX, refineZ = peakZ; // snapshot so it doesn't chase a moving target
+			    for (let wx = refineX - margin; wx <= refineX + margin; wx += step) {
+			        for (let wz = refineZ - margin; wz <= refineZ + margin; wz += step) {
 			            const raw =
 			                perlin2(wx * 0.003, wz * 0.003) * 1.0 +
 			                perlin2(wx * 0.012, wz * 0.012) * 0.3 +
@@ -348,17 +383,16 @@
 			            const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
 			            const h = sharp * 500;
 			            if (h > peakY) {
-			                peakY = h;
-			                peakX = wx;
-			                peakZ = wz;
+			                peakY = h; peakX = wx; peakZ = wz;
+			                document.getElementById('peakDisplay').textContent =
+			                    `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
 			            }
 			        }
 			        await new Promise(r => setTimeout(r, 0));
 			    }
-			
-			    document.getElementById('peakDisplay').textContent =
-			        `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
 			}
+
+
 
 			const he = 1.222222
 			const w = 2.3 
