@@ -500,12 +500,11 @@
 			}
 
 			function spawnOnGround() {
-			    if (!torso) {
-			        setTimeout(spawnOnGround, 50); // torso not loaded yet, try again
+			    if (!torso || !perlin2) {
+			        setTimeout(spawnOnGround, 50);
 			        return;
 			    }
 			
-			    // sample the height formula directly — no chunks needed
 			    const wx = 0, wz = 0;
 			    const raw =
 			        perlin2(wx * 0.003, wz * 0.003) * 1.0 +
@@ -516,9 +515,11 @@
 			    const spawnY = sharp * 500;
 			
 			    torso.position.set(0, spawnY, 0);
-			    vel.set(0, 0, 0);
+			    groundY = spawnY;      // tell the physics the ground is here
+			    vel.set(0, 0, 0);      // kill all momentum including the -0.5 z set by GLB loader
 			    isFlying = false;
 			}
+
 
 
 			
