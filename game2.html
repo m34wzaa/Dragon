@@ -217,22 +217,11 @@
 			    torso.scale.setScalar(200);
 			    scene.add(torso);
 			
-			    // ← replace the hardcoded position and vel with this:
-			    if (perlin2) {
-			        const raw =
-			            perlin2(0 * 0.003, 0 * 0.003) * 1.0 +
-			            perlin2(0 * 0.012, 0 * 0.012) * 0.3 +
-			            perlin2(0 * 0.04,  0 * 0.04)  * 0.08;
-			        const shifted = raw + 1.4;
-			        const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
-			        const spawnY = sharp * 500;
-			        torso.position.set(0, spawnY, 0);
-			        groundY = spawnY;
-			        isFlying = false;
-			    } else {
-			        torso.position.set(0, 500, 0); // fallback if joined before seed set
-			    }
-			    vel.set(0, 0, 0);
+			    torso.scale.setScalar(200);
+				scene.add(torso);
+				torso.position.set(0, 500, 0);
+				vel.set(0, 0, -0.5);
+
 			});
 
 			/*loader.load('tex/scene.gltf', (gltf) => {
