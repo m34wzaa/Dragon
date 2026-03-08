@@ -282,6 +282,7 @@
 			    mesh.position.set(cx * CHUNK_SIZE, 0, cz * CHUNK_SIZE);
 			    scene.add(mesh);
 			    groundMeshes.push(mesh);
+				scanChunkForPeak(cx, cz)
 			    return mesh;
 			}
 			
@@ -310,9 +311,31 @@
 			        }
 			    }
 			}
+			function scanChunkForPeak(cx, cz) {
+			    const step = 10; // finer scan per chunk
+			    for (let wx = cx * CHUNK_SIZE; wx <= (cx + 1) * CHUNK_SIZE; wx += step) {
+			        for (let wz = cz * CHUNK_SIZE; wz <= (cz + 1) * CHUNK_SIZE; wz += step) {
+			            const raw =
+			                perlin2(wx * 0.003, wz * 0.003) * 1.0 +
+			                perlin2(wx * 0.012, wz * 0.012) * 0.3 +
+			                perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
+			            const shifted = raw + 1.4;
+			            const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
+			            const h = sharp * 500;
+			            if (h > peakY) {
+			                peakY = h;
+			                peakX = wx;
+			                peakZ = wz;
+			                document.getElementById('peakDisplay').textContent =
+			                    `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
+			            }
+			        }
+			    }
+			}
+
 			async function findPeak() {
-			    const step = 50;
-			    const range = 5000;
+			    const step = 100;
+			    const range = 20000;
 			    document.getElementById('peakDisplay').textContent = `Peak: searching...`;
 			
 			    for (let wx = -range; wx <= range; wx += step) {
