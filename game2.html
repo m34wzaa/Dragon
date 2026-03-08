@@ -67,6 +67,7 @@
 		<div id="hud">
 		    <div id="coords">x: 0 &nbsp; y: 0 &nbsp; z: 0</div>
 		    <div id="seedDisplay">Seed: 1</div>
+			<div id="peakDisplay">Peak: — &nbsp; at (—, —, —)</div>
 		</div>
 
 		<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
@@ -115,12 +116,12 @@
 			const scene = new THREE.Scene();
 			let vel = new THREE.Vector3();
 			scene.background = new THREE.Color(0x222222);
-			let dist = 1000;
-			scene.fog = new THREE.Fog(0x222222, dist - (dist * 0.3), dist);
+			let dist = 5000;
+			scene.fog = new THREE.Fog(0x222222, dist - (dist * 0.1), dist);
 			let fov = 90;
 			const cam = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.01, dist);
-			cam.position.z = 90;
-			cam.position.y = 0;
+			cam.position.z = 0;
+			cam.position.y = 500;
 			const skyGeo = new THREE.SphereGeometry(dist * 0.9, 32, 32);
 			const skyMat = new THREE.ShaderMaterial({
 				uniforms: {
@@ -309,6 +310,32 @@
 			        }
 			    }
 			}
+			async function findPeak() {
+			    const step = 50;
+			    const range = 5000;
+			    document.getElementById('peakDisplay').textContent = `Peak: searching...`;
+			
+			    for (let wx = -range; wx <= range; wx += step) {
+			        for (let wz = -range; wz <= range; wz += step) {
+			            const raw =
+			                perlin2(wx * 0.003, wz * 0.003) * 1.0 +
+			                perlin2(wx * 0.012, wz * 0.012) * 0.3 +
+			                perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
+			            const shifted = raw + 1.4;
+			            const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
+			            const h = sharp * 500;
+			            if (h > peakY) {
+			                peakY = h;
+			                peakX = wx;
+			                peakZ = wz;
+			            }
+			        }
+			        await new Promise(r => setTimeout(r, 0));
+			    }
+			
+			    document.getElementById('peakDisplay').textContent =
+			        `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
+			}
 
 			const he = 1.222222
 			const w = 2.3 
@@ -479,6 +506,7 @@
 			document.getElementById('playBtn').addEventListener('click', () => {
 			    WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
 			    perlin2 = createNoise(WORLD_SEED);
+				findPeak();
 			    document.getElementById('startScreen').style.display = 'none';
 			    document.getElementById('seedDisplay').textContent = 'Seed: ' + WORLD_SEED;
 			    gameStarted = true;
@@ -522,6 +550,9 @@
 			let plus = 0
 			const surfaceNormal = new THREE.Vector3(0, 1, 0); 
 			let isFlying = true;
+			let peakY = -Infinity;
+			let peakX = 0, peakZ = 0;
+
 
 
 
@@ -604,6 +635,9 @@
 							vel.addScaledVector(forw, 0.4);
 						} 
 					}
+					if (keys['m']) {
+						console.log(wing1.rotaton.z, wing2.rotation.z);
+					}
 
 					if (keys['j'] && !keys['k']) {
 						plus += (0.5 - plus) * 0.1;
@@ -667,6 +701,7 @@
 					        seed: seed
 					    }));
 					}
+
 
 
 
