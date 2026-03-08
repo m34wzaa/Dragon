@@ -388,6 +388,7 @@
 			        }
 			
 			        if (++batch >= 20000) {
+						console.clear()
 						console.log(h, x, z)
 			            batch = 0;
 			            await new Promise(r => setTimeout(r, 0));
