@@ -341,11 +341,12 @@
 			    document.getElementById('peakDisplay').textContent = `Peak: searching...`;
 			    let x = 0, z = 0;
 			    let step = 1, stepCount = 0, dir = 0, turns = 0;
-			    const dx = [1, 0, -1, 0];
-			    const dz = [0, 1, 0, -1];
+			    const STEP = 10; // skip 10 units per spiral move — covers infinite map in reasonable time
+			    const dx = [STEP, 0, -STEP, 0];
+			    const dz = [0, STEP, 0, -STEP];
+			    let batch = 0;
 			
 			    while (true) {
-			        // sample this point
 			        const raw =
 			            perlin2(x * 0.003, z * 0.003) * 1.0 +
 			            perlin2(x * 0.012, z * 0.012) * 0.3 +
@@ -360,7 +361,6 @@
 			            refinePeak();
 			        }
 			
-			        // advance spiral
 			        x += dx[dir];
 			        z += dz[dir];
 			        stepCount++;
@@ -377,6 +377,7 @@
 			        }
 			    }
 			}
+
 
 			async function refinePeak() {
 			    const step = 1;
