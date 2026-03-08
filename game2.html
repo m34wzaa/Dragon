@@ -339,36 +339,45 @@
 			
 			async function findPeak() {
 			    document.getElementById('peakDisplay').textContent = `Peak: searching...`;
-			    peakSearchRadius = 0;
+			    let x = 0, z = 0;
+			    let step = 1, stepCount = 0, dir = 0, turns = 0;
+			    const dx = [1, 0, -1, 0];
+			    const dz = [0, 1, 0, -1];
 			
 			    while (true) {
-			        const r = peakSearchRadius;
-			        // scan the border ring at this radius
-			        for (let wx = -r; wx <= r; wx += PEAK_SEARCH_STEP) {
-			            for (let wz = -r; wz <= r; wz += PEAK_SEARCH_STEP) {
-			                // only scan the outer edge of this ring, not the interior (already done)
-			                if (Math.abs(wx) !== r && Math.abs(wz) !== r) continue;
-			                const raw =
-			                    perlin2(wx * 0.003, wz * 0.003) * 1.0 +
-			                    perlin2(wx * 0.012, wz * 0.012) * 0.3 +
-			                    perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
-			                const shifted = raw + 1.4;
-			                const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
-			                const h = sharp * 500;
-			                if (h > peakY) {
-			                    peakY = h;
-			                    peakX = wx;
-			                    peakZ = wz;
-			                    document.getElementById('peakDisplay').textContent =
-			                        `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
-								refinePeak();
-			                }
-			            }
+			        // sample this point
+			        const raw =
+			            perlin2(x * 0.003, z * 0.003) * 1.0 +
+			            perlin2(x * 0.012, z * 0.012) * 0.3 +
+			            perlin2(x * 0.04,  z * 0.04)  * 0.08;
+			        const shifted = raw + 1.4;
+			        const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
+			        const h = sharp * 500;
+			        if (h > peakY) {
+			            peakY = h; peakX = x; peakZ = z;
+			            document.getElementById('peakDisplay').textContent =
+			                `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
+			            refinePeak();
 			        }
-			        peakSearchRadius += PEAK_SEARCH_RING;
-			        await new Promise(r => setTimeout(r, 0));
+			
+			        // advance spiral
+			        x += dx[dir];
+			        z += dz[dir];
+			        stepCount++;
+			        if (stepCount === step) {
+			            stepCount = 0;
+			            dir = (dir + 1) % 4;
+			            turns++;
+			            if (turns % 2 === 0) step++;
+			        }
+			
+			        // yield every 500 steps so the game keeps running
+			        if ((x * x + z * z) % 500 === 0) {
+			            await new Promise(r => setTimeout(r, 0));
+			        }
 			    }
 			}
+
 			async function refinePeak() {
 			    const step = 1;
 			    const margin = 200;
