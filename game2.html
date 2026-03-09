@@ -444,6 +444,7 @@
 			    if (!torso || peakY === -Infinity) return;
 			    torso.position.set(peakX - 20, peakY - 2, peakZ);
 			    vel.set(0.01, 0, 0);
+				isFlying = true
 				cam.position.set(peakX - 23, peakY, peakZ)
 				torso.lookAt(peakX, peakY - 2, peakZ);
 			}
