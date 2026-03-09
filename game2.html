@@ -11,6 +11,15 @@
 				padding: 0;
 				overflow: hidden;
 			}
+			#box {
+				display: inline-flex;
+			    flex-direction: column;
+			    gap: 4px;
+			    background: rgba(0, 0, 0, 0.45);
+			    border: 1px solid #000000;
+			    padding: 8px 12px;
+			    border-radius: 0px;
+			}
 			#hud {
 			    position: fixed;
 			    top: 10px;
@@ -39,15 +48,15 @@
 			    padding: 6px 12px;
 			    font-size: 18px;
 			    background: #111;
-			    color: #00eeff;
-			    border: 1px solid #00eeff;
+			    color: #ffffff;
+			    border: 1px solid #ffffff;
 			    outline: none;
 			    text-align: center;
 			    width: 120px;
 			}
 			#startScreen button {
 			    padding: 8px 28px;
-			    background: #00eeff;
+			    background: #ffffff;
 			    color: #000;
 			    border: none;
 			    cursor: pointer;
@@ -65,22 +74,24 @@
 		    <button id="playBtn">join</button>
 		</div>
 		<div id="hud">
-		    <div id="coords">x: 0 &nbsp; y: 0 &nbsp; z: 0</div>
-		    <div id="seedDisplay">Seed: 1</div>
-			<div id="peakDisplay">Peak: - &nbsp; at (-, -, -)</div>
-			<div id="max">max: - &nbsp; 1</div>
-			<input type="range" min="1" max="32" step=1 id="renderDist" style="pointer-events: all;">
-			<button id="peakBtn" onclick="teleportToPeak()" style="
-			    margin-top: 4px;
-			    padding: 3px 10px;
-			    background: #00eeff;
-			    color: #000;
-			    border: none;
-			    cursor: pointer;
-			    font-size: 12px;
-			    font-family: monospace;
-			    pointer-events: all;
-			">go to peak</button>
+			<div id="box">
+			    <div id="coords">x: 0 &nbsp; y: 0 &nbsp; z: 0</div>
+			    <div id="seedDisplay">Seed: 1</div>
+				<div id="peakDisplay">Peak: - &nbsp; at (-, -, -)</div>
+				<div id="max">max: - &nbsp; 1</div>
+				<input type="range" min="1" max="32" step=1 id="renderDist" style="pointer-events: all;">
+				<button id="peakBtn" onclick="teleportToPeak()" style="
+				    margin-top: 4px;
+				    padding: 3px 10px;
+				    background: #ffffff;
+				    color: #000;
+				    border: none;
+				    cursor: pointer;
+				    font-size: 12px;
+				    font-family: monospace;
+				    pointer-events: all;
+				">go to peak</button>
+			</div>
 		</div>
 
 		<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
