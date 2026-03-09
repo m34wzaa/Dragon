@@ -328,7 +328,7 @@
 			    }
 			}
 			function scanChunkForPeak(cx, cz) {
-			    const step = 10; // finer scan per chunk
+			    const step = 1; // finer scan per chunk
 			    for (let wx = cx * CHUNK_SIZE; wx <= (cx + 1) * CHUNK_SIZE; wx += step) {
 			        for (let wz = cz * CHUNK_SIZE; wz <= (cz + 1) * CHUNK_SIZE; wz += step) {
 			            const raw =
@@ -387,7 +387,7 @@
 			            if (turns % 2 === 0) step++;
 			        }
 			
-			        if (++batch >= 20000) {
+			        if (++batch >= 50000) {
 						console.clear()
 						console.log(h, x, z)
 			            batch = 0;
