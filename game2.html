@@ -442,8 +442,9 @@
 			}
 			function teleportToPeak() {
 			    if (!torso || peakY === -Infinity) return;
-			    torso.position.set(peakX, peakY + 2, peakZ);
-			    vel.set(0, -0.3, 0);
+			    torso.position.set(peakX - 5, peakY, peakZ);
+			    vel.set(0.02, 0, 0);
+				torso.lookAt(peakX, peakY, peakZ);
 			}
 			window.teleportToPeak = teleportToPeak;
 
