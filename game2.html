@@ -357,7 +357,7 @@
 			    document.getElementById('peakDisplay').textContent = `Peak: searching...`;
 			    let x = 0, z = 0;
 			    let step = 1, stepCount = 0, dir = 0, turns = 0;
-			    const STEP = 10; // skip 10 units per spiral move — covers infinite map in reasonable time
+			    const STEP = 1; 
 			    const dx = [STEP, 0, -STEP, 0];
 			    const dz = [0, STEP, 0, -STEP];
 			    let batch = 0;
