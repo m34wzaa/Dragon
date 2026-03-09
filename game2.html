@@ -67,7 +67,8 @@
 		<div id="hud">
 		    <div id="coords">x: 0 &nbsp; y: 0 &nbsp; z: 0</div>
 		    <div id="seedDisplay">Seed: 1</div>
-			<div id="peakDisplay">Peak: — &nbsp; at (—, —, —)</div>
+			<div id="peakDisplay">Peak: - &nbsp; at (-, -, -)</div>
+			<div id="maxSearched">max: - &nbsp; 1</div>
 			<button id="peakBtn" onclick="teleportToPeak()" style="
 			    margin-top: 4px;
 			    padding: 3px 10px;
@@ -809,18 +810,18 @@
 					cam.lookAt(headpos);
 					//--- ANIM ---
 					if (!onGround) {
-					    // smooth flap speed — faster when boosting with J, slower when braking with K
+					    // smooth flap speed - faster when boosting with J, slower when braking with K
 					    const targetFlapSpeed = 0.05 + seed * 0.07 + plus * 0.05;
 					    flapSpeed += (targetFlapSpeed - flapSpeed) * 0.04;
 					    flapPhase += flapSpeed;
 					
-					    // smooth wing fold — lerp toward target instead of snapping
+					    // smooth wing fold - lerp toward target instead of snapping
 					    const targetY2 = Math.min((seed * 2) + Math.PI + plus, 4.6);
 					    const targetY1 = Math.max((-seed * 2) - Math.PI - plus, -4.6);
 					    wing2.rotation.y += (targetY2 - wing2.rotation.y) * 0.07;
 					    wing1.rotation.y += (targetY1 - wing1.rotation.y) * 0.07;
 					
-					    // flap amplitude — bigger when slow or boosting, fades at high speed
+					    // flap amplitude - bigger when slow or boosting, fades at high speed
 					    const flapAmp = Math.max(0, (0.55 - seed + plus * 0.25)) * 0.9;
 					    const flapTarget1 =  Math.sin(flapPhase) * flapAmp;
 					    const flapTarget2 = -Math.sin(flapPhase) * flapAmp;
