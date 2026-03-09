@@ -390,7 +390,6 @@
 			
 			        if (++batch >= 50000) {
 						console.clear()
-						console.log(h, x, z)
 						if (Math.max(Math.abs(x),Math.abs(z)) > maxx) {
 							maxx = Math.max(Math.abs(x),Math.abs(z));
 							document.getElementById('max').textContent = `max: ${maxx}`;
@@ -735,7 +734,7 @@
 						} 
 					}
 					if (keys['m']) {
-						console.log(wing1.rotaton.z, wing2.rotation.z);
+						console.log(wing1.rotaton.y, wing2.rotation.y, head.rotation.y);
 					}
 
 					if (keys['j'] && !keys['k']) {
