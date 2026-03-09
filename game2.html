@@ -68,7 +68,7 @@
 		    <div id="coords">x: 0 &nbsp; y: 0 &nbsp; z: 0</div>
 		    <div id="seedDisplay">Seed: 1</div>
 			<div id="peakDisplay">Peak: - &nbsp; at (-, -, -)</div>
-			<div id="maxSearched">max: - &nbsp; 1</div>
+			<div id="max">max: - &nbsp; 1</div>
 			<button id="peakBtn" onclick="teleportToPeak()" style="
 			    margin-top: 4px;
 			    padding: 3px 10px;
@@ -352,8 +352,8 @@
 
 			let peakSearchRadius = 0;
 			const PEAK_SEARCH_STEP = 100;
-			const PEAK_SEARCH_RING = 1200; // how far each async tick expands
-			
+			const PEAK_SEARCH_RING = 1200;
+			let maxx = 0;
 			async function findPeak() {
 			    document.getElementById('peakDisplay').textContent = `Peak: searching...`;
 			    let x = 0, z = 0;
@@ -391,6 +391,10 @@
 			        if (++batch >= 50000) {
 						console.clear()
 						console.log(h, x, z)
+						if (Math.max(Math.abs(x),Math.abs(z)) > maxx) {
+							maxx = Math.max(Math.abs(x),Math.abs(z));
+							document.getElementById('max').textContent = `max: ${maxx}`;
+						}
 			            batch = 0;
 			            await new Promise(r => setTimeout(r, 0));
 			        }
