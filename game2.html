@@ -605,7 +605,13 @@
 			window.addEventListener('keyup', (e) => {
 				keys[e.key] = false
 			});
-			function land() {
+			window.addEventListener('keydown', (e) => {
+			    if (e.key === 'p' || e.key === 'Escape') {
+			        paused = !paused;
+			        document.getElementById('pauseMenu').style.display = paused ? 'block' : 'none';
+			    }
+			});
+			function land(s) {
 				seed = seed / 1.1;
 				vel.multiplyScalar(0.9);
 
@@ -628,7 +634,22 @@
 				);
 
 				torso.quaternion.slerp(targetQuat, 0.1);
-				if (stance == 'none') {
+				if (s == stanceL[0]) {//running
+					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2.2) * 0.1;
+					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2.2) * 0.1;
+				}
+				if (s == stanceL[1]) {//sitting
+					
+				}
+				if (s == stanceL[2]) {//sleeping
+					tail.rotation.y = 1.4
+					tail2.rotation.y = 1.2
+					head.rotation.y = -0.9
+				}
+				if (s == stanceL[3]) {//defensive
+					head.rotation.z = Math.PI / (30 / 365);
+				}
+				if (s == stanceL[4]) {//walking
 					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2) * 0.1;
 					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2) * 0.1;
 					wing1.rotation.z += (0 - wing1.rotation.z) * 0.1;
@@ -740,7 +761,11 @@
 					if (onGround && stance == 'isFlying') stance = 'none';
 					if (keys['d']) { 
 						if (onGround) {
-							torso.rotateOnAxis(yaxis, -0.03);
+							if (stance == stanceL[0]) torso.rotateOnAxis(yaxis, -0.02);
+							if (stance == stanceL[1]) torso.rotateOnAxis(yaxis, -0.005);
+							if (stance == stanceL[2]) torso.rotateOnAxis(yaxis, 0);
+							if (stance == stanceL[3]) torso.rotateOnAxis(yaxis, -0.01);
+							if (stance == stanceL[4]) torso.rotateOnAxis(yaxis, -0.03);
 							yawing = -1
 						} else {
 							torso.rotateOnAxis(raxis,  0.04); 
@@ -749,7 +774,11 @@
 					}
 					if (keys['a']) { 
 						if (onGround) {
-							torso.rotateOnAxis(yaxis, 0.03);
+							if (stance == stanceL[0]) torso.rotateOnAxis(yaxis, 0.02);
+							if (stance == stanceL[1]) torso.rotateOnAxis(yaxis, 0.005);
+							if (stance == stanceL[2]) torso.rotateOnAxis(yaxis, 0);
+							if (stance == stanceL[3]) torso.rotateOnAxis(yaxis, 0.01);
+							if (stance == stanceL[4]) torso.rotateOnAxis(yaxis, 0.03);
 							yawing = 1
 						} else {
 							torso.rotateOnAxis(raxis,  -0.04); 
@@ -761,7 +790,11 @@
 							torso.rotateOnAxis(paxis, -0.02 + (wing2.rotation.y - minrot - 0.3) * 0.01); 
 							pitching = -1; 
 						} else {
-							vel.addScaledVector(forw, -0.01);
+							if (stance == stanceL[0]) vel.addScaledVector(forw, -0.02);
+							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.00); // only 0.00 cos im too lazy to change
+							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.00);
+							if (stance == stanceL[0]) vel.addScaledVector(forw, -0.002);
+							if (stance == stanceL[0]) vel.addScaledVector(forw, -0.01);
 						}
 					}
 					if (keys['w']) { 
@@ -769,7 +802,11 @@
 							torso.rotateOnAxis(paxis,  0.02 + (wing2.rotation.y - minrot - 0.3) * -0.01); 
 							pitching =  1; 
 						} else {
-							vel.addScaledVector(forw, 0.01);
+							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.02);
+							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.00);
+							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.00);
+							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.002);
+							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.01);
 						}
 					}
 					if (keys[' ']) {
