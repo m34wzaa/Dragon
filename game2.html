@@ -63,6 +63,16 @@
 			    font-size: 15px;
 			    font-family: monospace;
 			}
+			#pauseMenu {
+				display: none;
+				position: fixed;
+				background: #fff;
+				color: #000;
+				border: none;
+				cursor: default;
+				font-size: 25px;
+				font-family: monospace;
+			}
 
 		</style>
 	</head>
@@ -92,6 +102,10 @@
 				    font-family: monospace;
 				    pointer-events: all;
 				">go to peak</button>
+			</div>
+			<div id="pauseMenu">
+				<button id="stanceMenu" onclick="openStance()" style="
+					">stances</button>
 			</div>
 		</div>
 
@@ -406,7 +420,6 @@
 			        }
 			
 			        if (++batch >= 50000) {
-						console.clear()
 						if (Math.max(Math.abs(x),Math.abs(z)) > maxx) {
 							maxx = Math.max(Math.abs(x),Math.abs(z));
 							document.getElementById('max').textContent = `max: ${maxx}`;
@@ -444,7 +457,7 @@
 			    if (!torso || peakY === -Infinity) return;
 			    torso.position.set(peakX - 20, peakY - 2, peakZ);
 			    vel.set(0.01, 0, 0);
-				isFlying = true
+				stance = isFlying
 				cam.position.set(peakX - 23, peakY, peakZ)
 				torso.lookAt(peakX, peakY - 2, peakZ);
 			}
@@ -596,7 +609,7 @@
 				seed = seed / 1.1;
 				vel.multiplyScalar(0.9);
 
-				// get dragon's actual world-space forward
+				// get dreg forward dir
 				const currentForward = new THREE.Vector3(0, 0, 1).applyQuaternion(torso.quaternion);
 
 				currentForward.addScaledVector(surfaceNormal, -currentForward.dot(surfaceNormal));
@@ -615,11 +628,12 @@
 				);
 
 				torso.quaternion.slerp(targetQuat, 0.1);
-
-				wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2) * 0.1;
-				wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2) * 0.1;
-				wing1.rotation.z += (0 - wing1.rotation.z) * 0.1;
-				wing2.rotation.z += (0 - wing2.rotation.z) * 0.1;
+				if (stance == none) {
+					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2) * 0.1;
+					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2) * 0.1;
+					wing1.rotation.z += (0 - wing1.rotation.z) * 0.1;
+					wing2.rotation.z += (0 - wing2.rotation.z) * 0.1;
+				}
 			}
 			document.getElementById('playBtn').addEventListener('click', () => {
 			    WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
@@ -632,6 +646,11 @@
 
 
 
+			function openStance() {
+				menu.innerHTML = '<b style="font-size:14px">— stances —</b><br><br>';
+			}
+
+
 
 
 
@@ -639,7 +658,6 @@
 			let angly = 0.3
 			let speed = 16
 			let timer = 0
-
 			const paxis = new THREE.Vector3(1, 0, 0);
 			const yaxis = new THREE.Vector3(0, 1, 0);
 			const raxis = new THREE.Vector3(0, 0, 1);
@@ -667,10 +685,18 @@
 			const maxrot = 4.6
 			let plus = 0
 			const surfaceNormal = new THREE.Vector3(0, 1, 0); 
-			let isFlying = true;
+
+			let stanceL = [isRunning, isSitting, isSleeping, isDefensive, none]
+			let stance = isFlying // can be flying if in air, sitting, running, walking, sleeping or none.
+			// running would make it faster, and also add a forward backward movement, and also move the tail up and down to account for movement
+			// sitting would prop the drag up so itll be basically sitting with its tail flat with the ground
+			// sleeping would make it curl up and sleep
+			// defensive will make it enter a defensive stance that it can also (hopefully soon) attack other dregs
+			// all of these will only send the wing rot and other stuff to the server
+			
 			let peakY = -Infinity;
 			let peakX = 0, peakZ = 0;
-
+			let paused = false;
 
 
 
@@ -711,7 +737,7 @@
 					let rolling = 0;
 					let pitching = 0;
 					let yawing = 0;
-
+					if (onGround && stance == isFlying) stance = none;
 					if (keys['d']) { 
 						if (onGround) {
 							torso.rotateOnAxis(yaxis, -0.03);
@@ -747,14 +773,23 @@
 						}
 					}
 					if (keys[' ']) {
-						if (onGround && !isFlying) {
-							isFlying = true;
+						if (onGround && !(stance == isFlying)) {
+							stance = isFlying;
 							vel.addScaledVector(up, 1);
 							vel.addScaledVector(forw, 0.4);
 						} 
 					}
+					if (keys['p'] || keys['Escape']) {
+						const menu = document.getElementById("menu")
+						menu.addEventListener('pause', (e) => {
+							paused = !paused
+							document.getElementById('pauseMenu').style.display = paused ? 'block' : 'none';
+						});
+					}
 					if (keys['m']) {
-						console.log(wing1.rotaton.y, wing2.rotation.y, head.rotation.y);
+						console.log(wing1.rotaton.y);
+						console.log(wing2.rotation.y);
+						console.log(head.rotation.y);
 					}
 
 					if (keys['j'] && !keys['k']) {
@@ -780,7 +815,7 @@
 					const lift = uprightness * (1 - wingFactor);
 
 					vel.y -= 0.01 * (1 - lift);
-					if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.06));
+					if (stance == isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.06));
 					vel.multiplyScalar(0.96);
 					let speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
 					//if (keys['k'] && !keys['j']) speedCap = THREE.MathUtils.lerp(1.5, 0.25, wingFactor);
@@ -792,7 +827,7 @@
 
 					if (torso.position.y < groundY) {
 						torso.position.y = groundY;
-						isFlying = false; 
+						stance = onGround; 
 						if (!(keys['w'] || keys['s'])) vel.set(vel.x * 0.8, vel.y * 0.8, vel.z * 0.8);
 					}
 					if (onGround) {
@@ -833,18 +868,15 @@
 					cam.lookAt(headpos);
 					//--- ANIM ---
 					if (!onGround) {
-					    // smooth flap speed - faster when boosting with J, slower when braking with K
 					    const targetFlapSpeed = 0.05 + seed * 0.07 + plus * 0.05;
 					    flapSpeed += (targetFlapSpeed - flapSpeed) * 0.04;
 					    flapPhase += flapSpeed;
 					
-					    // smooth wing fold - lerp toward target instead of snapping
 					    const targetY2 = Math.min((seed * 2) + Math.PI + plus, 4.6);
 					    const targetY1 = Math.max((-seed * 2) - Math.PI - plus, -4.6);
 					    wing2.rotation.y += (targetY2 - wing2.rotation.y) * 0.07;
 					    wing1.rotation.y += (targetY1 - wing1.rotation.y) * 0.07;
 					
-					    // flap amplitude - bigger when slow or boosting, fades at high speed
 					    const flapAmp = Math.max(0, (0.55 - seed + plus * 0.25)) * 0.9;
 					    const flapTarget1 =  Math.sin(flapPhase) * flapAmp;
 					    const flapTarget2 = -Math.sin(flapPhase) * flapAmp;
