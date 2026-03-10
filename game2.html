@@ -457,7 +457,7 @@
 			    if (!torso || peakY === -Infinity) return;
 			    torso.position.set(peakX - 20, peakY - 2, peakZ);
 			    vel.set(0.01, 0, 0);
-				stance = isFlying
+				stance = 'isFlying'
 				cam.position.set(peakX - 23, peakY, peakZ)
 				torso.lookAt(peakX, peakY - 2, peakZ);
 			}
@@ -628,7 +628,7 @@
 				);
 
 				torso.quaternion.slerp(targetQuat, 0.1);
-				if (stance == none) {
+				if (stance == 'none') {
 					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2) * 0.1;
 					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2) * 0.1;
 					wing1.rotation.z += (0 - wing1.rotation.z) * 0.1;
@@ -687,7 +687,7 @@
 			const surfaceNormal = new THREE.Vector3(0, 1, 0); 
 
 			let stanceL = ['isRunning', 'isSitting', 'isSleeping', 'isDefensive', 'none']
-			let stance = isFlying // can be flying if in air, sitting, running, walking, sleeping or none.
+			let stance = 'isFlying' // can be flying if in air, sitting, running, walking, sleeping or none.
 			// running would make it faster, and also add a forward backward movement, and also move the tail up and down to account for movement
 			// sitting would prop the drag up so itll be basically sitting with its tail flat with the ground
 			// sleeping would make it curl up and sleep
@@ -737,7 +737,7 @@
 					let rolling = 0;
 					let pitching = 0;
 					let yawing = 0;
-					if (onGround && stance == isFlying) stance = none;
+					if (onGround && stance == 'isFlying') stance = 'none';
 					if (keys['d']) { 
 						if (onGround) {
 							torso.rotateOnAxis(yaxis, -0.03);
@@ -773,8 +773,8 @@
 						}
 					}
 					if (keys[' ']) {
-						if (onGround && !(stance == isFlying)) {
-							stance = isFlying;
+						if (onGround && !(stance == 'isFlying')) {
+							stance = 'isFlying';
 							vel.addScaledVector(up, 1);
 							vel.addScaledVector(forw, 0.4);
 						} 
@@ -815,7 +815,7 @@
 					const lift = uprightness * (1 - wingFactor);
 
 					vel.y -= 0.01 * (1 - lift);
-					if (stance == isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.06));
+					if (stance == 'isFlying') vel.addScaledVector(forw, 0.02 + (plus * 0.06));
 					vel.multiplyScalar(0.96);
 					let speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
 					//if (keys['k'] && !keys['j']) speedCap = THREE.MathUtils.lerp(1.5, 0.25, wingFactor);
@@ -827,7 +827,7 @@
 
 					if (torso.position.y < groundY) {
 						torso.position.y = groundY;
-						stance = onGround; 
+						stance = 'none'; 
 						if (!(keys['w'] || keys['s'])) vel.set(vel.x * 0.8, vel.y * 0.8, vel.z * 0.8);
 					}
 					if (onGround) {
