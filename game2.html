@@ -538,28 +538,12 @@
 			}
 
 			function makePlayerMesh(x, y, z) {
-			    const clone = torso.clone();
-			    scene.add(clone);
-			    const indicator = makeIndicator();
-			    indicator.position.set(x, y + 2, z);
-			
-			    // children order matches torso.add() call order
-			    const cHead  = clone.children[0]; // head
-			    const cWing1 = clone.children[1]; // wing1
-			    const cWing2 = clone.children[2]; // wing2
-			    const cTail1 = clone.children[3]; // tail1
-			    const cTail2 = cTail1.children[0]; // tail2 (child of tail1)
-			
-			    console.log(cHead, cWing1, cWing2, cTail1, cTail2); // verify none are null
-			
-			    return { mesh: clone, cHead, cWing1, cWing2, cTail1, cTail2, indicator };
+				const clone = torso.clone();
+				scene.add(clone);
+				const indicator = makeIndicator();
+				indicator.position.set(x, y + 2, z);
+				return { mesh: clone, targetParts: null, indicator };
 			}
-
-
-
-
-
-
 
 			socket.addEventListener('message', (e) => {
 				const msg = JSON.parse(e.data);
@@ -595,6 +579,7 @@
 						if (p.cWing2) p.cWing2.rotation.set(msg.parts.wing2.rx, msg.parts.wing2.ry, msg.parts.wing2.rz);
 						if (p.cTail1) p.cTail1.rotation.set(msg.parts.tail1.rx, msg.parts.tail1.ry, msg.parts.tail1.rz);
 						if (p.cTail2) p.cTail2.rotation.set(msg.parts.tail2.rx, msg.parts.tail2.ry, msg.parts.tail2.rz);
+						p.targetParts = msg.parts;
 					}
 				}
 
@@ -1063,14 +1048,26 @@
 				const fovFactor = 2 * Math.tan(THREE.MathUtils.degToRad(fov / 2));
 				const desiredPixels = 22;
 
-				for (const id in otherPlayers) {
+				/*for (const id in otherPlayers) {
 					const p = otherPlayers[id];
 					const d = cam.position.distanceTo(p.indicator.position);
 					p.indicator.scale.setScalar(fovFactor * d * desiredPixels / window.innerHeight);
 					const worldDown = new THREE.Vector3(0, -1, 0);
 					worldDown.transformDirection(cam.matrixWorldInverse);
 					p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
+				}*/
+				for (const id in otherPlayers) {
+				    const p = otherPlayers[id];
+				    if (!p.targetParts) continue;
+				    const c = p.mesh.children; // [head, wing1, wing2, tail1]
+				    const t = p.targetParts;
+				    if (c[0]) c[0].rotation.set(t.head.rx,  t.head.ry,  t.head.rz);
+				    if (c[1]) c[1].rotation.set(t.wing1.rx, t.wing1.ry, t.wing1.rz);
+				    if (c[2]) c[2].rotation.set(t.wing2.rx, t.wing2.ry, t.wing2.rz);
+				    if (c[3]) c[3].rotation.set(t.tail1.rx, t.tail1.ry, t.tail1.rz);
+				    if (c[3]?.children[0]) c[3].children[0].rotation.set(t.tail2.rx, t.tail2.ry, t.tail2.rz);
 				}
+
 				render.render(scene, cam)
 
 			}
