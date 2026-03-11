@@ -1041,16 +1041,20 @@
 					worldDown.transformDirection(cam.matrixWorldInverse);
 					p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
 				}*/
-				for (const id of Object.keys(otherPlayers)) removePlayer(id);
-
+				for (const id of Object.keys(otherPlayers)) {
+				    if (!playerData[id]) removePlayer(id);
+				}
 				for (const id in playerData) {
 				    if (!torso) continue;
-				    const d = playerData[id];
-				    otherPlayers[id] = makePlayerMesh(d.pos.x, d.pos.y, d.pos.z);
+				    if (!otherPlayers[id]) {
+				        otherPlayers[id] = makePlayerMesh(0, 0, 0);
+				    }
 				    const p = otherPlayers[id];
+				    const d = playerData[id];
 				
 				    p.mesh.position.set(d.pos.x, d.pos.y, d.pos.z);
 				    p.mesh.quaternion.set(d.quat.x, d.quat.y, d.quat.z, d.quat.w);
+				    p.indicator.position.set(d.pos.x, d.pos.y + 2, d.pos.z);
 				
 				    if (d.parts) {
 				        const c = p.mesh.children;
