@@ -1027,7 +1027,7 @@
 					cam.up.lerp(camU, 0.1);
 					cam.lookAt(headpos);
 					//--- ANIM ---
-					if (isflying) {
+					if (isFlying) {
 						const targetFlapSpeed = 0.05 + seed * 0.07 + plus * 0.05;
 						flapSpeed += (targetFlapSpeed - flapSpeed) * 0.04;
 						flapPhase += flapSpeed;
