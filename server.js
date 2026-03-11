@@ -17,17 +17,19 @@ wss.on('connection', (ws) => {
             ws.send(JSON.stringify({ type: 'join', id: pid }));
         }
     });
+
     ws.on('message', (data) => {
         const msg = JSON.parse(data);
         if (msg.type === 'move') {
             players[id] = { pos: msg.pos, quat: msg.quat };
             wss.clients.forEach((client) => {
                 if (client !== ws && client.readyState === 1) {
-                    client.send(JSON.stringify({ type: 'move', id, pos: msg.pos, quat: msg.quat, vel: msg.vel, wing: msg.wing, seed: msg.seed }));
+                    client.send(JSON.stringify({ ...msg, id }));
                 }
             });
         }
     });
+
     ws.on('close', () => {
         delete players[id];
         wss.clients.forEach((client) => {
