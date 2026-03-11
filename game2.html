@@ -174,22 +174,22 @@
 				vertexShader: `
 					varying vec3 vWorldPosition;
 					void main() {
-						vec4 worldPos = modelMatrix * vec4(position, 1.0);
-						vWorldPosition = worldPos.xyz;
-						gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+					vec4 worldPos = modelMatrix * vec4(position, 1.0);
+					vWorldPosition = worldPos.xyz;
+					gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 					}
-				`,
-				fragmentShader: `
+					`,
+									fragmentShader: `
 					uniform vec3 topColor;
 					uniform vec3 bottomColor;
 					uniform float offset;
 					uniform float exponent;
 					varying vec3 vWorldPosition;
 					void main() {
-						float h = normalize(vWorldPosition).y + offset;
-						gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
+					float h = normalize(vWorldPosition).y + offset;
+					gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
 					}
-				`,
+					`,
 				side: THREE.BackSide // render inside of sphere
 			});
 			const sky = new THREE.Mesh(skyGeo, skyMat);
@@ -261,19 +261,19 @@
 			});
 
 			/*loader.load('tex/scene.gltf', (gltf) => {
-				const enviro = gltf.scene;
-
-				const box = new THREE.Box3().setFromObject(enviro);
-				const center = new THREE.Vector3();
-				box.getCenter(center);
-				enviro.position.sub(center);
-
-				enviro.scale.setScalar(500);
-				enviro.position.set(0, 0, 0);
-				scene.add(enviro);
-				enviro.traverse((child) => {
-					if (child.isMesh) groundMeshes.push(child);
-				});
+			const enviro = gltf.scene;
+			
+			const box = new THREE.Box3().setFromObject(enviro);
+			const center = new THREE.Vector3();
+			box.getCenter(center);
+			enviro.position.sub(center);
+			
+			enviro.scale.setScalar(500);
+			enviro.position.set(0, 0, 0);
+			scene.add(enviro);
+			enviro.traverse((child) => {
+			if (child.isMesh) groundMeshes.push(child);
+			});
 			});*/
 			let WORLD_SEED = 1;
 			let perlin2 = null;
@@ -544,19 +544,19 @@
 			}
 
 			function makePlayerMesh(x, y, z) {
-			    const clone = torso.clone();
-			    scene.add(clone);
-			    const indicator = makeIndicator();
-			    indicator.position.set(x, y + 2, z);
-			    return {
-			        mesh:   clone,
-			        cHead:  clone.getObjectByName('head'),
-			        cWing1: clone.getObjectByName('wing1'),
-			        cWing2: clone.getObjectByName('wing2'),
-			        cTail1: clone.getObjectByName('tail1'),
-			        cTail2: clone.getObjectByName('tail2'),
-			        indicator
-			    };
+				const clone = torso.clone();
+				scene.add(clone);
+				const indicator = makeIndicator();
+				indicator.position.set(x, y + 2, z);
+				return {
+					mesh:   clone,
+					cHead:  clone.getObjectByName('head'),
+					cWing1: clone.getObjectByName('wing1'),
+					cWing2: clone.getObjectByName('wing2'),
+					cTail1: clone.getObjectByName('tail1'),
+					cTail2: clone.getObjectByName('tail2'),
+					indicator
+				};
 			}
 
 
@@ -584,21 +584,21 @@
 						}
 						return;
 					}
-					if (!otherPlayers[msg.id] && torso) { // ← combined into one clean check
+					if (!otherPlayers[msg.id] && torso) { 
 						otherPlayers[msg.id] = makePlayerMesh(msg.pos.x, msg.pos.y, msg.pos.z);
 					}
-					if (!otherPlayers[msg.id]) return; // torso not ready yet, try next frame
+					if (!otherPlayers[msg.id]) return; 9
 					const p = otherPlayers[msg.id];
 					p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
 					p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
 					p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
-					
+
 					if (msg.parts) {
-					    if (p.cHead)  p.cHead.rotation.set( msg.parts.head.rx,  msg.parts.head.ry,  msg.parts.head.rz);
-					    if (p.cWing1) p.cWing1.rotation.set(msg.parts.wing1.rx, msg.parts.wing1.ry, msg.parts.wing1.rz);
-					    if (p.cWing2) p.cWing2.rotation.set(msg.parts.wing2.rx, msg.parts.wing2.ry, msg.parts.wing2.rz);
-					    if (p.cTail1) p.cTail1.rotation.set(msg.parts.tail1.rx, msg.parts.tail1.ry, msg.parts.tail1.rz);
-					    if (p.cTail2) p.cTail2.rotation.set(msg.parts.tail2.rx, msg.parts.tail2.ry, msg.parts.tail2.rz);
+						if (p.cHead)  p.cHead.rotation.set( msg.parts.head.rx,  msg.parts.head.ry,  msg.parts.head.rz);
+						if (p.cWing1) p.cWing1.rotation.set(msg.parts.wing1.rx, msg.parts.wing1.ry, msg.parts.wing1.rz);
+						if (p.cWing2) p.cWing2.rotation.set(msg.parts.wing2.rx, msg.parts.wing2.ry, msg.parts.wing2.rz);
+						if (p.cTail1) p.cTail1.rotation.set(msg.parts.tail1.rx, msg.parts.tail1.ry, msg.parts.tail1.rz);
+						if (p.cTail2) p.cTail2.rotation.set(msg.parts.tail2.rx, msg.parts.tail2.ry, msg.parts.tail2.rz);
 					}
 				}
 
@@ -660,11 +660,11 @@
 
 				let tiltTarget = 0;
 				if (s === stanceL[1]) tiltTarget = -1;
-				
+
 				sitTiltAngle += (tiltTarget - sitTiltAngle) * 0.05;
-				
+
 				const tiltQuat = new THREE.Quaternion().setFromAxisAngle(
-				    new THREE.Vector3(1, 0, 0), sitTiltAngle
+					new THREE.Vector3(1, 0, 0), sitTiltAngle
 				);
 				const finalQuat = targetQuat.clone().multiply(tiltQuat);
 				torso.quaternion.slerp(finalQuat, 0.1);
@@ -677,7 +677,7 @@
 					head.rotation.x += (0 - head.rotation.x) * 0.1;
 					head.rotation.y += (0 - head.rotation.y) * 0.1;
 					head.rotation.z += (0 - head.rotation.z) * 0.1;
-				    tail1.rotation.y += (0 - tail1.rotation.y) * 0.1;
+					tail1.rotation.y += (0 - tail1.rotation.y) * 0.1;
 					tail2.rotation.y += (0 - tail2.rotation.y) * 0.1;
 					tail1.rotation.x += (0 - tail1.rotation.x) * 0.1;
 					tail2.rotation.x += (0 - tail2.rotation.x) * 0.1;
@@ -732,23 +732,23 @@
 					head.rotation.x += (0 - head.rotation.x) * 0.1;
 					head.rotation.y += (0 - head.rotation.y) * 0.1;
 					head.rotation.z += (0 - head.rotation.z) * 0.1;
-				    tail1.rotation.y += (0 - tail1.rotation.y) * 0.1;
+					tail1.rotation.y += (0 - tail1.rotation.y) * 0.1;
 					tail2.rotation.y += (0 - tail2.rotation.y) * 0.1;
 					tail1.rotation.x += (0 - tail1.rotation.x) * 0.1;
 					tail2.rotation.x += (0 - tail2.rotation.x) * 0.1;
 				}
 				if (isFlying) {
-				    head.rotation.x += (0 - head.rotation.x) * 0.05;
-				    head.rotation.y += (0 - head.rotation.y) * 0.05;
-				    head.rotation.z += (0 - head.rotation.z) * 0.05;
-				    tail1.rotation.x += (0 - tail1.rotation.x) * 0.05;
-				    tail1.rotation.y += (0 - tail1.rotation.y) * 0.05;
-				    tail1.rotation.z += (0 - tail1.rotation.z) * 0.05;
-				    tail2.rotation.x += (0 - tail2.rotation.x) * 0.05;
-				    tail2.rotation.y += (0 - tail2.rotation.y) * 0.05;
-				    tail2.rotation.z += (0 - tail2.rotation.z) * 0.05;
-				    wing1.rotation.x += (0 - wing1.rotation.x) * 0.05;
-				    wing2.rotation.x += (0 - wing2.rotation.x) * 0.05;
+					head.rotation.x += (0 - head.rotation.x) * 0.05;
+					head.rotation.y += (0 - head.rotation.y) * 0.05;
+					head.rotation.z += (0 - head.rotation.z) * 0.05;
+					tail1.rotation.x += (0 - tail1.rotation.x) * 0.05;
+					tail1.rotation.y += (0 - tail1.rotation.y) * 0.05;
+					tail1.rotation.z += (0 - tail1.rotation.z) * 0.05;
+					tail2.rotation.x += (0 - tail2.rotation.x) * 0.05;
+					tail2.rotation.y += (0 - tail2.rotation.y) * 0.05;
+					tail2.rotation.z += (0 - tail2.rotation.z) * 0.05;
+					wing1.rotation.x += (0 - wing1.rotation.x) * 0.05;
+					wing2.rotation.x += (0 - wing2.rotation.x) * 0.05;
 				}
 			}
 			document.getElementById('playBtn').addEventListener('click', () => {
@@ -765,33 +765,33 @@
 			function openStance() {
 				const menu = document.getElementById('pauseMenu');
 				menu.innerHTML = `
-			        <b style="font-size:16px; margin-bottom:8px;">— stances —</b>
-			        <p style="font-size:11px; margin-bottom:12px; opacity:0.6;">only active on ground</p>
-			        <div id="stanceGrid" style="
-			            display: grid;
-			            grid-template-columns: 1fr 1fr;
-			            gap: 8px;
-			            width: 260px;
-			        "></div>
-			    `;
+					<b style="font-size:16px; margin-bottom:8px;">— stances —</b>
+					<p style="font-size:11px; margin-bottom:12px; opacity:0.6;">only active on ground</p>
+					<div id="stanceGrid" style="
+					display: grid;
+					grid-template-columns: 1fr 1fr;
+					gap: 8px;
+					width: 260px;
+					"></div>
+					`;
 
 				const grid = document.getElementById('stanceGrid');
 
 				stanceL.forEach(name => {
 					const btn = document.createElement('button');
-					btn.textContent = name.replace('is', '').toLowerCase(); // "isRunning" → "running"
+					btn.textContent = name.replace('is', '').toLowerCase();
 					btn.style.cssText = `
-			            padding: 10px 0;
-			            background: ${stance === name ? '#ffffff' : 'transparent'};
-			            color: ${stance === name ? '#000' : '#fff'};
-			            border: 1px solid #ffffff;
-			            cursor: pointer;
-			            font-family: monospace;
-			            font-size: 13px;
-			        `;
+						padding: 10px 0;
+						background: ${stance === name ? '#ffffff' : 'transparent'};
+						color: ${stance === name ? '#000' : '#fff'};
+						border: 1px solid #ffffff;
+						cursor: pointer;
+						font-family: monospace;
+						font-size: 13px;
+						`;
 					btn.addEventListener('click', () => {
 						stance = name;
-						openStance(); // re-render to update highlight
+						openStance();
 					});
 					grid.appendChild(btn);
 				});
@@ -988,11 +988,11 @@
 						if (torso.position.y <= groundY) {
 							torso.position.y = groundY;
 							vel.y = 0; // ← kill vertical on ground
-						    isFlying = false;
-						    if (!(keys['w'] || keys['s'])) {
+							isFlying = false;
+							if (!(keys['w'] || keys['s'])) {
 								vel.x *= 0.8;
 								vel.z *= 0.8;
-						    }
+							}
 						}
 						if (torso.position.y < groundY) {
 							torso.position.y = groundY;
@@ -1013,22 +1013,22 @@
 					document.getElementById('coords').textContent =`X: ${torso.position.x.toFixed(0)}  Y: ${torso.position.y.toFixed(0)}  Z: ${torso.position.z.toFixed(0)}`;
 					// send position to server every frame
 					if (socket.readyState === 1 && myId && torso && gameStarted) {
-					    const q = torso.quaternion;
-					    socket.send(JSON.stringify({
-					        type: 'move',
-					        worldSeed: WORLD_SEED,
-					        pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
-					        quat: { x: q.x, y: q.y, z: q.z, w: q.w },
-					        vel:  { x: vel.x, y: vel.y, z: vel.z },
-					        seed: seed,
-					        parts: {
-					            head:  { rx: head.rotation.x,  ry: head.rotation.y,  rz: head.rotation.z  },
-					            wing1: { rx: wing1.rotation.x, ry: wing1.rotation.y, rz: wing1.rotation.z },
-					            wing2: { rx: wing2.rotation.x, ry: wing2.rotation.y, rz: wing2.rotation.z },
-					            tail1: { rx: tail1.rotation.x, ry: tail1.rotation.y, rz: tail1.rotation.z },
-					            tail2: { rx: tail2.rotation.x, ry: tail2.rotation.y, rz: tail2.rotation.z },
-					        }
-					    }));
+						const q = torso.quaternion;
+						socket.send(JSON.stringify({
+							type: 'move',
+							worldSeed: WORLD_SEED,
+							pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
+							quat: { x: q.x, y: q.y, z: q.z, w: q.w },
+							vel:  { x: vel.x, y: vel.y, z: vel.z },
+							seed: seed,
+							parts: {
+								head:  { rx: head.rotation.x,  ry: head.rotation.y,  rz: head.rotation.z  },
+								wing1: { rx: wing1.rotation.x, ry: wing1.rotation.y, rz: wing1.rotation.z },
+								wing2: { rx: wing2.rotation.x, ry: wing2.rotation.y, rz: wing2.rotation.z },
+								tail1: { rx: tail1.rotation.x, ry: tail1.rotation.y, rz: tail1.rotation.z },
+								tail2: { rx: tail2.rotation.x, ry: tail2.rotation.y, rz: tail2.rotation.z },
+							}
+						}));
 					}
 
 
