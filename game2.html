@@ -870,7 +870,7 @@
 							isFlying = false;
 						}
 						if (keys['d']) { 
-							if (onGround) {
+							if (!isFlying) {
 								if (stance == stanceL[0]) torso.rotateOnAxis(yaxis, -0.02);
 								if (stance == stanceL[1]) torso.rotateOnAxis(yaxis, -0.005);
 								if (stance == stanceL[2]) torso.rotateOnAxis(yaxis, 0);
@@ -883,7 +883,7 @@
 							}
 						}
 						if (keys['a']) { 
-							if (onGround) {
+							if (!isFlying) {
 								if (stance == stanceL[0]) torso.rotateOnAxis(yaxis, 0.02);
 								if (stance == stanceL[1]) torso.rotateOnAxis(yaxis, 0.005);
 								if (stance == stanceL[2]) torso.rotateOnAxis(yaxis, 0);
@@ -896,7 +896,7 @@
 							}
 						}
 						if (keys['s']) { 
-							if (!onGround) {
+							if (isFlying) {
 								torso.rotateOnAxis(paxis, -0.02 + (wing2.rotation.y - minrot - 0.3) * 0.01); 
 								pitching = -1; 
 							} else {
@@ -908,7 +908,7 @@
 							}
 						}
 						if (keys['w']) { 
-							if (!onGround) {
+							if (isFlying) {
 								torso.rotateOnAxis(paxis,  0.02 + (wing2.rotation.y - minrot - 0.3) * -0.01); 
 								pitching =  1; 
 							} else {
@@ -920,10 +920,12 @@
 							}
 						}
 						if (keys[' ']) {
-							if (onGround && !(isFlying)) {
+							if (!isFlying) {
 								isFlying = true;
-								vel.addScaledVector(up, 1);
-								vel.addScaledVector(forw, 0.4);
+								if (onGround) {
+									vel.addScaledVector(up, 1);
+									vel.addScaledVector(forw, 0.4);
+								}
 							} 
 						}
 						if (keys['m']) {
@@ -1025,7 +1027,7 @@
 					cam.up.lerp(camU, 0.1);
 					cam.lookAt(headpos);
 					//--- ANIM ---
-					if (!onGround) {
+					if (isflying) {
 						const targetFlapSpeed = 0.05 + seed * 0.07 + plus * 0.05;
 						flapSpeed += (targetFlapSpeed - flapSpeed) * 0.04;
 						flapPhase += flapSpeed;
