@@ -700,6 +700,19 @@
 					tail1.rotation.x += (0 - tail1.rotation.x) * 0.1;
 					tail2.rotation.x += (0 - tail2.rotation.x) * 0.1;
 				}
+				if (isFlying) {
+				    head.rotation.x += (0 - head.rotation.x) * 0.05;
+				    head.rotation.y += (0 - head.rotation.y) * 0.05;
+				    head.rotation.z += (0 - head.rotation.z) * 0.05;
+				    tail1.rotation.x += (0 - tail1.rotation.x) * 0.05;
+				    tail1.rotation.y += (0 - tail1.rotation.y) * 0.05;
+				    tail1.rotation.z += (0 - tail1.rotation.z) * 0.05;
+				    tail2.rotation.x += (0 - tail2.rotation.x) * 0.05;
+				    tail2.rotation.y += (0 - tail2.rotation.y) * 0.05;
+				    tail2.rotation.z += (0 - tail2.rotation.z) * 0.05;
+				    wing1.rotation.x += (0 - wing1.rotation.x) * 0.05;
+				    wing2.rotation.x += (0 - wing2.rotation.x) * 0.05;
+				}
 			}
 			document.getElementById('playBtn').addEventListener('click', () => {
 				WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
