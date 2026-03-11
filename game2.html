@@ -544,6 +544,15 @@
 				indicator.position.set(x, y + 2, z);
 				return { mesh: clone, targetParts: null, indicator };
 			}
+			function removePlayer(id) {
+			    const p = otherPlayers[id];
+			    if (!p) return;
+			    scene.remove(p.mesh);
+			    scene.remove(p.indicator);
+				p.indicator.material.map.dispose();
+			    p.indicator.material.dispose();
+			    delete otherPlayers[id];
+			}
 
 			socket.addEventListener('message', (e) => {
 				const msg = JSON.parse(e.data);
@@ -555,41 +564,16 @@
 				if (msg.id === myId) return;
 
 				if (msg.type === 'move') {
-					if (msg.worldSeed !== undefined && msg.worldSeed !== WORLD_SEED) {
-						if (otherPlayers[msg.id]) {
-							scene.remove(otherPlayers[msg.id].mesh);
-							scene.remove(otherPlayers[msg.id].indicator);
-							otherPlayers[msg.id].indicator.material.dispose();
-							delete otherPlayers[msg.id];
-						}
-						return;
-					}
-					if (!otherPlayers[msg.id] && torso) { 
-						otherPlayers[msg.id] = makePlayerMesh(msg.pos.x, msg.pos.y, msg.pos.z);
-					}
-					if (!otherPlayers[msg.id]) return; 9
-					const p = otherPlayers[msg.id];
-					p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
-					p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
-					p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
-
-					if (msg.parts) {
-						if (p.cHead)  p.cHead.rotation.set( msg.parts.head.rx,  msg.parts.head.ry,  msg.parts.head.rz);
-						if (p.cWing1) p.cWing1.rotation.set(msg.parts.wing1.rx, msg.parts.wing1.ry, msg.parts.wing1.rz);
-						if (p.cWing2) p.cWing2.rotation.set(msg.parts.wing2.rx, msg.parts.wing2.ry, msg.parts.wing2.rz);
-						if (p.cTail1) p.cTail1.rotation.set(msg.parts.tail1.rx, msg.parts.tail1.ry, msg.parts.tail1.rz);
-						if (p.cTail2) p.cTail2.rotation.set(msg.parts.tail2.rx, msg.parts.tail2.ry, msg.parts.tail2.rz);
-						p.targetParts = msg.parts;
-					}
+				    if (msg.worldSeed !== undefined && msg.worldSeed !== WORLD_SEED) {
+				        delete playerData[msg.id];
+				        removePlayer(msg.id);
+				        return;
+				    }
+				    playerData[msg.id] = { pos: msg.pos, quat: msg.quat, parts: msg.parts };
 				}
-
-
-
-				if (msg.type === 'leave' && otherPlayers[msg.id]) {
-					scene.remove(otherPlayers[msg.id].mesh);
-					scene.remove(otherPlayers[msg.id].indicator);
-					otherPlayers[msg.id].indicator.material.dispose();
-					delete otherPlayers[msg.id];
+				if (msg.type === 'leave') {
+				    delete playerData[msg.id];
+				    removePlayer(msg.id);
 				}
 			});
 
@@ -826,6 +810,7 @@
 			let peakY = -Infinity;
 			let peakX = 0, peakZ = 0;
 			let paused = false;
+			const playerData = {}
 
 
 
@@ -1056,12 +1041,20 @@
 					worldDown.transformDirection(cam.matrixWorldInverse);
 					p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
 				}*/
-				for (const id in otherPlayers) {
+				for (const id of Object.keys(otherPlayers)) removePlayer(id);
+
+				for (const id in playerData) {
+				    if (!torso) continue;
+				    const d = playerData[id];
+				    otherPlayers[id] = makePlayerMesh(d.pos.x, d.pos.y, d.pos.z);
 				    const p = otherPlayers[id];
 				
-				    if (p.targetParts) {
+				    p.mesh.position.set(d.pos.x, d.pos.y, d.pos.z);
+				    p.mesh.quaternion.set(d.quat.x, d.quat.y, d.quat.z, d.quat.w);
+				
+				    if (d.parts) {
 				        const c = p.mesh.children;
-				        const t = p.targetParts;
+				        const t = d.parts;
 				        if (c[0]) c[0].rotation.set(t.head.rx,  t.head.ry,  t.head.rz);
 				        if (c[1]) c[1].rotation.set(t.wing1.rx, t.wing1.ry, t.wing1.rz);
 				        if (c[2]) c[2].rotation.set(t.wing2.rx, t.wing2.ry, t.wing2.rz);
@@ -1069,8 +1062,8 @@
 				        if (c[3]?.children[0]) c[3].children[0].rotation.set(t.tail2.rx, t.tail2.ry, t.tail2.rz);
 				    }
 				
-				    const d = cam.position.distanceTo(p.indicator.position);
-				    p.indicator.scale.setScalar(fovFactor * d * desiredPixels / window.innerHeight);
+				    const dist = cam.position.distanceTo(p.indicator.position);
+				    p.indicator.scale.setScalar(fovFactor * dist * desiredPixels / window.innerHeight);
 				    const worldDown = new THREE.Vector3(0, -1, 0);
 				    worldDown.transformDirection(cam.matrixWorldInverse);
 				    p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
