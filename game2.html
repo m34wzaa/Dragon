@@ -1057,14 +1057,21 @@
 				    p.indicator.position.set(d.pos.x, d.pos.y + 2, d.pos.z);
 				
 				    if (d.parts) {
-				        const c = p.mesh.children;
-				        const t = d.parts;
-				        if (c[0]) c[0].rotation.set(t.head.rx,  t.head.ry,  t.head.rz);
-				        if (c[1]) c[1].rotation.set(t.wing1.rx, t.wing1.ry, t.wing1.rz);
-				        if (c[2]) c[2].rotation.set(t.wing2.rx, t.wing2.ry, t.wing2.rz);
-				        if (c[3]) c[3].rotation.set(t.tail1.rx, t.tail1.ry, t.tail1.rz);
-				        if (c[3]?.children[0]) c[3].children[0].rotation.set(t.tail2.rx, t.tail2.ry, t.tail2.rz);
-				    }
+					    const c = p.mesh.children;
+					    const t = d.parts;
+					    
+					    if (c[0]) c[0].rotation.set(0, 0, 0); // head
+					    if (c[1]) c[1].rotation.set(0, -3.6, 0); // wing1 neutral
+					    if (c[2]) c[2].rotation.set(0, 3.6, 0);  // wing2 neutral
+					    if (c[3]) c[3].rotation.set(0, 0, 0);    // tail1
+					    if (c[3]?.children[0]) c[3].children[0].rotation.set(0, 0, 0); // tail2
+					    
+					    if (c[0]) c[0].rotation.set(t.head.rx,  t.head.ry,  t.head.rz);
+					    if (c[1]) c[1].rotation.set(t.wing1.rx, t.wing1.ry, t.wing1.rz);
+					    if (c[2]) c[2].rotation.set(t.wing2.rx, t.wing2.ry, t.wing2.rz);
+					    if (c[3]) c[3].rotation.set(t.tail1.rx, t.tail1.ry, t.tail1.rz);
+					    if (c[3]?.children[0]) c[3].children[0].rotation.set(t.tail2.rx, t.tail2.ry, t.tail2.rz);
+					}
 				
 				    const dist = cam.position.distanceTo(p.indicator.position);
 				    p.indicator.scale.setScalar(fovFactor * dist * desiredPixels / window.innerHeight);
