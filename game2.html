@@ -234,6 +234,11 @@
 				torso.add(wing2);
 				torso.add(tail1);
 				tail1.add(tail2);
+				head.name  = 'head';
+				wing1.name = 'wing1';
+				wing2.name = 'wing2';
+				tail1.name = 'tail1';
+				tail2.name = 'tail2';
 
 				head.position.set(0, 0, -0.001);
 				head.scale.setScalar(0.7);
@@ -539,12 +544,21 @@
 			}
 
 			function makePlayerMesh(x, y, z) {
-				const clone = torso.clone();
-				scene.add(clone);
-				const indicator = makeIndicator();
-				indicator.position.set(x, y + 2, z);
-				return { mesh: clone, indicator };
+			    const clone = torso.clone();
+			    scene.add(clone);
+			    const indicator = makeIndicator();
+			    indicator.position.set(x, y + 2, z);
+			    return {
+			        mesh:   clone,
+			        cHead:  clone.getObjectByName('head'),
+			        cWing1: clone.getObjectByName('wing1'),
+			        cWing2: clone.getObjectByName('wing2'),
+			        cTail1: clone.getObjectByName('tail1'),
+			        cTail2: clone.getObjectByName('tail2'),
+			        indicator
+			    };
 			}
+
 
 
 
@@ -577,9 +591,15 @@
 					const p = otherPlayers[msg.id];
 					p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
 					p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
-					p.targetWing = msg.wing;
 					p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
-					p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
+					
+					if (msg.parts) {
+					    if (p.cHead)  p.cHead.rotation.set( msg.parts.head.rx,  msg.parts.head.ry,  msg.parts.head.rz);
+					    if (p.cWing1) p.cWing1.rotation.set(msg.parts.wing1.rx, msg.parts.wing1.ry, msg.parts.wing1.rz);
+					    if (p.cWing2) p.cWing2.rotation.set(msg.parts.wing2.rx, msg.parts.wing2.ry, msg.parts.wing2.rz);
+					    if (p.cTail1) p.cTail1.rotation.set(msg.parts.tail1.rx, msg.parts.tail1.ry, msg.parts.tail1.rz);
+					    if (p.cTail2) p.cTail2.rotation.set(msg.parts.tail2.rx, msg.parts.tail2.ry, msg.parts.tail2.rz);
+					}
 				}
 
 
@@ -991,17 +1011,24 @@
 					document.getElementById('coords').textContent =`X: ${torso.position.x.toFixed(0)}  Y: ${torso.position.y.toFixed(0)}  Z: ${torso.position.z.toFixed(0)}`;
 					// send position to server every frame
 					if (socket.readyState === 1 && myId && torso && gameStarted) {
-						const q = torso.quaternion;
-						socket.send(JSON.stringify({
-							type: 'move',
-							worldSeed: WORLD_SEED,
-							pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
-							quat: { x: q.x, y: q.y, z: q.z, w: q.w },
-							vel:  { x: vel.x, y: vel.y, z: vel.z },
-							wing: wing2.rotation.y,
-							seed: seed
-						}));
+					    const q = torso.quaternion;
+					    socket.send(JSON.stringify({
+					        type: 'move',
+					        worldSeed: WORLD_SEED,
+					        pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
+					        quat: { x: q.x, y: q.y, z: q.z, w: q.w },
+					        vel:  { x: vel.x, y: vel.y, z: vel.z },
+					        seed: seed,
+					        parts: {
+					            head:  { rx: head.rotation.x,  ry: head.rotation.y,  rz: head.rotation.z  },
+					            wing1: { rx: wing1.rotation.x, ry: wing1.rotation.y, rz: wing1.rotation.z },
+					            wing2: { rx: wing2.rotation.x, ry: wing2.rotation.y, rz: wing2.rotation.z },
+					            tail1: { rx: tail1.rotation.x, ry: tail1.rotation.y, rz: tail1.rotation.z },
+					            tail2: { rx: tail2.rotation.x, ry: tail2.rotation.y, rz: tail2.rotation.z },
+					        }
+					    }));
 					}
+
 
 
 
