@@ -75,6 +75,7 @@
 			}
 
 		</style>
+		<link rel="icon" type="image/png" href="icon.png">
 	</head>
 	<body>
 		<div id="startScreen">
@@ -609,6 +610,7 @@
 			    if (e.key === 'p' || e.key === 'Escape') {
 			        paused = !paused;
 			        document.getElementById('pauseMenu').style.display = paused ? 'block' : 'none';
+					if (paused == true) openStance();
 			    }
 			});
 			function land(s) {
@@ -642,7 +644,7 @@
 					
 				}
 				if (s == stanceL[2]) {//sleeping
-					tail.rotation.y = 1.4
+					tail1.rotation.y = 1.4
 					tail2.rotation.y = 1.2
 					head.rotation.y = -0.9
 				}
@@ -668,6 +670,7 @@
 
 
 			function openStance() {
+				const menu = document.getElementById('pauseMenu');
 				menu.innerHTML = '<b style="font-size:14px">— stances —</b><br><br>';
 			}
 
@@ -791,10 +794,10 @@
 							pitching = -1; 
 						} else {
 							if (stance == stanceL[0]) vel.addScaledVector(forw, -0.02);
-							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.00); // only 0.00 cos im too lazy to change
-							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.00);
-							if (stance == stanceL[0]) vel.addScaledVector(forw, -0.002);
-							if (stance == stanceL[0]) vel.addScaledVector(forw, -0.01);
+							if (stance == stanceL[1]) vel.addScaledVector(forw, 0.00); // only 0.00 cos im too lazy to change
+							if (stance == stanceL[2]) vel.addScaledVector(forw, 0.00);
+							if (stance == stanceL[3]) vel.addScaledVector(forw, -0.002);
+							if (stance == stanceL[4]) vel.addScaledVector(forw, -0.01);
 						}
 					}
 					if (keys['w']) { 
@@ -803,10 +806,10 @@
 							pitching =  1; 
 						} else {
 							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.02);
-							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.00);
-							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.00);
-							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.002);
-							if (stance == stanceL[0]) vel.addScaledVector(forw, 0.01);
+							if (stance == stanceL[1]) vel.addScaledVector(forw, 0.00);
+							if (stance == stanceL[2]) vel.addScaledVector(forw, 0.00);
+							if (stance == stanceL[3]) vel.addScaledVector(forw, 0.002);
+							if (stance == stanceL[4]) vel.addScaledVector(forw, 0.01);
 						}
 					}
 					if (keys[' ']) {
@@ -816,15 +819,8 @@
 							vel.addScaledVector(forw, 0.4);
 						} 
 					}
-					if (keys['p'] || keys['Escape']) {
-						const menu = document.getElementById("menu")
-						menu.addEventListener('pause', (e) => {
-							paused = !paused
-							document.getElementById('pauseMenu').style.display = paused ? 'block' : 'none';
-						});
-					}
 					if (keys['m']) {
-						console.log(wing1.rotaton.y);
+						console.log(wing1.rotation.y);
 						console.log(wing2.rotation.y);
 						console.log(head.rotation.y);
 					}
@@ -868,7 +864,7 @@
 						if (!(keys['w'] || keys['s'])) vel.set(vel.x * 0.8, vel.y * 0.8, vel.z * 0.8);
 					}
 					if (onGround) {
-						land();
+						land(stance);
 					} else {
 						seed = Math.sqrt(vel.x**2 + vel.y**2 + vel.z**2);
 					}
