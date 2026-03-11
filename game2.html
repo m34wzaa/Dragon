@@ -641,23 +641,51 @@
 				if (s == stanceL[0]) {//running
 					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2.2) * 0.1;
 					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2.2) * 0.1;
+					tail1.rotation.y += (0 - tail1.rotation.y) * 0.1;
+					tail2.rotation.y += (0 - tail2.rotation.y) * 0.1;
+					head.rotation.x += (0 - head.rotation.x) * 0.1;
+					head.rotation.y += (0 - head.rotation.y) * 0.1;
+					head.rotation.z += (0 - head.rotation.z) * 0.1;
+					wing1.rotation.z += (0 - wing1.rotation.z) * 0.1;
+					wing2.rotation.z += (0 - wing2.rotation.z) * 0.1;
 				}
 				if (s == stanceL[1]) {//sitting
-
+					tail1.rotation.y += (0 - tail1.rotation.y) * 0.1;
+					tail2.rotation.y += (0 - tail2.rotation.y) * 0.1;
+					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2) * 0.1;
+					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2) * 0.1;
+					head.rotation.x += (0 - head.rotation.x) * 0.1;
+					head.rotation.y += (0 - head.rotation.y) * 0.1;
+					head.rotation.z += (0 - head.rotation.z) * 0.1;
 				}
 				if (s == stanceL[2]) {//sleeping
-					tail1.rotation.y = 1.4
-					tail2.rotation.y = 1.2
-					head.rotation.y = -0.9
+					tail1.rotation.y += (1.4 - tail1.rotation.y) * 0.05;
+					tail2.rotation.y += (1.2 - tail2.rotation.y) * 0.05;
+					head.rotation.y  += (-0.9 - head.rotation.y)  * 0.05;
+					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2) * 0.1;
+					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2) * 0.1;
 				}
 				if (s == stanceL[3]) {//defensive
-					head.rotation.z = Math.PI / (30 / 365);
+					head.rotation.z += (Math.PI * (30 / 365) - head.rotation.z) * 0.1;
+					tail1.rotation.y += (0 - tail1.rotation.y) * 0.1;
+					tail2.rotation.y += (0 - tail2.rotation.y) * 0.1;
+					head.rotation.x += (0 - head.rotation.x) * 0.1;
+					head.rotation.y += (0 - head.rotation.y) * 0.1;
+					wing1.rotation.y += (-Math.PI * 1.8 - wing1.rotation.y) * 0.1;
+					wing2.rotation.y += ( Math.PI * 1.8 - wing2.rotation.y) * 0.1;
+					wing1.rotation.z += (0 - wing1.rotation.z) * 0.1;
+					wing2.rotation.z += (0 - wing2.rotation.z) * 0.1;
 				}
 				if (s == stanceL[4]) {//walking
 					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2) * 0.1;
 					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2) * 0.1;
 					wing1.rotation.z += (0 - wing1.rotation.z) * 0.1;
 					wing2.rotation.z += (0 - wing2.rotation.z) * 0.1;
+					head.rotation.x += (0 - head.rotation.x) * 0.1;
+					head.rotation.y += (0 - head.rotation.y) * 0.1;
+					head.rotation.z += (0 - head.rotation.z) * 0.1;
+				    tail1.rotation.y += (0 - tail1.rotation.y) * 0.1;
+					tail2.rotation.y += (0 - tail2.rotation.y) * 0.1;
 				}
 			}
 			document.getElementById('playBtn').addEventListener('click', () => {
@@ -894,7 +922,15 @@
 						vel.clampLength(0, speedCap);
 
 						torso.position.add(vel);
-
+						if (torso.position.y <= groundY) {
+							torso.position.y = groundY;
+							vel.y = 0; // ← kill vertical on ground
+						    isFlying = false;
+						    if (!(keys['w'] || keys['s'])) {
+								vel.x *= 0.8;
+								vel.z *= 0.8;
+						    }
+						}
 						if (torso.position.y < groundY) {
 							torso.position.y = groundY;
 							stance = 'none'; 
