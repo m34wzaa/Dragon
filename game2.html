@@ -172,24 +172,24 @@
 					exponent: { value: 0.6 }
 				},
 				vertexShader: `
-					varying vec3 vWorldPosition;
-					void main() {
-					vec4 worldPos = modelMatrix * vec4(position, 1.0);
-					vWorldPosition = worldPos.xyz;
-					gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-					}
-					`,
-									fragmentShader: `
-					uniform vec3 topColor;
-					uniform vec3 bottomColor;
-					uniform float offset;
-					uniform float exponent;
-					varying vec3 vWorldPosition;
-					void main() {
-					float h = normalize(vWorldPosition).y + offset;
-					gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
-					}
-					`,
+							varying vec3 vWorldPosition;
+							void main() {
+							vec4 worldPos = modelMatrix * vec4(position, 1.0);
+							vWorldPosition = worldPos.xyz;
+							gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+							}
+							`,
+				fragmentShader: `
+							uniform vec3 topColor;
+							uniform vec3 bottomColor;
+							uniform float offset;
+							uniform float exponent;
+							varying vec3 vWorldPosition;
+							void main() {
+							float h = normalize(vWorldPosition).y + offset;
+							gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
+							}
+							`,
 				side: THREE.BackSide // render inside of sphere
 			});
 			const sky = new THREE.Mesh(skyGeo, skyMat);
@@ -255,20 +255,20 @@
 			});
 
 			/*loader.load('tex/scene.gltf', (gltf) => {
-			const enviro = gltf.scene;
-			
-			const box = new THREE.Box3().setFromObject(enviro);
-			const center = new THREE.Vector3();
-			box.getCenter(center);
-			enviro.position.sub(center);
-			
-			enviro.scale.setScalar(500);
-			enviro.position.set(0, 0, 0);
-			scene.add(enviro);
-			enviro.traverse((child) => {
-			if (child.isMesh) groundMeshes.push(child);
-			});
-			});*/
+					const enviro = gltf.scene;
+					
+					const box = new THREE.Box3().setFromObject(enviro);
+					const center = new THREE.Vector3();
+					box.getCenter(center);
+					enviro.position.sub(center);
+					
+					enviro.scale.setScalar(500);
+					enviro.position.set(0, 0, 0);
+					scene.add(enviro);
+					enviro.traverse((child) => {
+					if (child.isMesh) groundMeshes.push(child);
+					});
+					});*/
 			let WORLD_SEED = 1;
 			let perlin2 = null;
 			let gameStarted = false;
@@ -539,19 +539,30 @@
 
 			function makePlayerMesh(x, y, z) {
 				const clone = torso.clone();
+				clone.position.set(x, y, z);
+				clone.quaternion.identity(); // reset rotation so it starts neutral
 				scene.add(clone);
 				const indicator = makeIndicator();
 				indicator.position.set(x, y + 2, z);
-				return { mesh: clone, targetParts: null, indicator };
+				return {
+					mesh:   clone,
+					cHead:  clone.getObjectByName('dreg_head'),
+					cWing1: clone.getObjectByName('dreg_wing1'),
+					cWing2: clone.getObjectByName('dreg_wing2'),
+					cTail1: clone.getObjectByName('dreg_tail1'),
+					cTail2: clone.getObjectByName('dreg_tail2'),
+					indicator
+				};
 			}
+
 			function removePlayer(id) {
-			    const p = otherPlayers[id];
-			    if (!p) return;
-			    scene.remove(p.mesh);
-			    scene.remove(p.indicator);
+				const p = otherPlayers[id];
+				if (!p) return;
+				scene.remove(p.mesh);
+				scene.remove(p.indicator);
 				p.indicator.material.map.dispose();
-			    p.indicator.material.dispose();
-			    delete otherPlayers[id];
+				p.indicator.material.dispose();
+				delete otherPlayers[id];
 			}
 
 			socket.addEventListener('message', (e) => {
@@ -564,16 +575,16 @@
 				if (msg.id === myId) return;
 
 				if (msg.type === 'move') {
-				    if (msg.worldSeed !== undefined && msg.worldSeed !== WORLD_SEED) {
-				        delete playerData[msg.id];
-				        removePlayer(msg.id);
-				        return;
-				    }
-				    playerData[msg.id] = { pos: msg.pos, quat: msg.quat, parts: msg.parts };
+					if (msg.worldSeed !== undefined && msg.worldSeed !== WORLD_SEED) {
+						delete playerData[msg.id];
+						removePlayer(msg.id);
+						return;
+					}
+					playerData[msg.id] = { pos: msg.pos, quat: msg.quat, parts: msg.parts };
 				}
 				if (msg.type === 'leave') {
-				    delete playerData[msg.id];
-				    removePlayer(msg.id);
+					delete playerData[msg.id];
+					removePlayer(msg.id);
 				}
 			});
 
@@ -730,15 +741,15 @@
 			function openStance() {
 				const menu = document.getElementById('pauseMenu');
 				menu.innerHTML = `
-					<b style="font-size:16px; margin-bottom:8px;">— stances —</b>
-					<p style="font-size:11px; margin-bottom:12px; opacity:0.6;">only active on ground</p>
-					<div id="stanceGrid" style="
-					display: grid;
-					grid-template-columns: 1fr 1fr;
-					gap: 8px;
-					width: 260px;
-					"></div>
-					`;
+							<b style="font-size:16px; margin-bottom:8px;">— stances —</b>
+							<p style="font-size:11px; margin-bottom:12px; opacity:0.6;">only active on ground</p>
+							<div id="stanceGrid" style="
+							display: grid;
+							grid-template-columns: 1fr 1fr;
+							gap: 8px;
+							width: 260px;
+							"></div>
+							`;
 
 				const grid = document.getElementById('stanceGrid');
 
@@ -746,14 +757,14 @@
 					const btn = document.createElement('button');
 					btn.textContent = name.replace('is', '').toLowerCase();
 					btn.style.cssText = `
-						padding: 10px 0;
-						background: ${stance === name ? '#ffffff' : 'transparent'};
-						color: ${stance === name ? '#000' : '#fff'};
-						border: 1px solid #ffffff;
-						cursor: pointer;
-						font-family: monospace;
-						font-size: 13px;
-						`;
+								padding: 10px 0;
+								background: ${stance === name ? '#ffffff' : 'transparent'};
+								color: ${stance === name ? '#000' : '#fff'};
+								border: 1px solid #ffffff;
+								cursor: pointer;
+								font-family: monospace;
+								font-size: 13px;
+								`;
 					btn.addEventListener('click', () => {
 						stance = name;
 						openStance();
@@ -1034,52 +1045,45 @@
 				const desiredPixels = 22;
 
 				/*for (const id in otherPlayers) {
+							const p = otherPlayers[id];
+							const d = cam.position.distanceTo(p.indicator.position);
+							p.indicator.scale.setScalar(fovFactor * d * desiredPixels / window.innerHeight);
+							const worldDown = new THREE.Vector3(0, -1, 0);
+							worldDown.transformDirection(cam.matrixWorldInverse);
+							p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
+						}*/
+				for (const id of Object.keys(otherPlayers)) {
+					if (!playerData[id]) removePlayer(id);
+				}
+				for (const id in playerData) {
+					if (!torso || !gameStarted) break;
+					if (!otherPlayers[id]) {
+						otherPlayers[id] = makePlayerMesh(0, 0, 0);
+						const p = otherPlayers[id];
+						console.log('parts found:', p.cHead, p.cWing1, p.cWing2, p.cTail1, p.cTail2);
+					}
 					const p = otherPlayers[id];
-					const d = cam.position.distanceTo(p.indicator.position);
-					p.indicator.scale.setScalar(fovFactor * d * desiredPixels / window.innerHeight);
+					const d = playerData[id];
+
+					p.mesh.position.set(d.pos.x, d.pos.y, d.pos.z);
+					p.mesh.quaternion.set(d.quat.x, d.quat.y, d.quat.z, d.quat.w);
+					p.indicator.position.set(d.pos.x, d.pos.y + 2, d.pos.z);
+
+					if (d.parts) {
+						const t = d.parts;
+						if (p.cHead)  p.cHead.rotation.set(t.head.rx,   t.head.ry,   t.head.rz);
+						if (p.cWing1) p.cWing1.rotation.set(t.wing1.rx, t.wing1.ry,  t.wing1.rz);
+						if (p.cWing2) p.cWing2.rotation.set(t.wing2.rx, t.wing2.ry,  t.wing2.rz);
+						if (p.cTail1) p.cTail1.rotation.set(t.tail1.rx, t.tail1.ry,  t.tail1.rz);
+						if (p.cTail2) p.cTail2.rotation.set(t.tail2.rx, t.tail2.ry,  t.tail2.rz);
+					}
+
+					const dist = cam.position.distanceTo(p.indicator.position);
+					p.indicator.scale.setScalar(fovFactor * dist * desiredPixels / window.innerHeight);
 					const worldDown = new THREE.Vector3(0, -1, 0);
 					worldDown.transformDirection(cam.matrixWorldInverse);
 					p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
-				}*/
-				for (const id of Object.keys(otherPlayers)) {
-				    if (!playerData[id]) removePlayer(id);
 				}
-				for (const id in playerData) {
-				    if (!torso || !gameStarted) break;
-				    if (!otherPlayers[id]) {
-				        otherPlayers[id] = makePlayerMesh(0, 0, 0);
-				    }
-				    const p = otherPlayers[id];
-				    const d = playerData[id];
-				
-				    p.mesh.position.set(d.pos.x, d.pos.y, d.pos.z);
-				    p.mesh.quaternion.set(d.quat.x, d.quat.y, d.quat.z, d.quat.w);
-				    p.indicator.position.set(d.pos.x, d.pos.y + 2, d.pos.z);
-				
-				    if (d.parts) {
-					    const c = p.mesh.children;
-					    const t = d.parts;
-					    
-					    if (c[0]) c[0].rotation.set(0, 0, 0); // head
-					    if (c[1]) c[1].rotation.set(0, -3.6, 0); // wing1 neutral
-					    if (c[2]) c[2].rotation.set(0, 3.6, 0);  // wing2 neutral
-					    if (c[3]) c[3].rotation.set(0, 0, 0);    // tail1
-					    if (c[3]?.children[0]) c[3].children[0].rotation.set(0, 0, 0); // tail2
-					    
-					    if (c[0]) c[0].rotation.set(t.head.rx,  t.head.ry,  t.head.rz);
-					    if (c[1]) c[1].rotation.set(t.wing1.rx, t.wing1.ry, t.wing1.rz);
-					    if (c[2]) c[2].rotation.set(t.wing2.rx, t.wing2.ry, t.wing2.rz);
-					    if (c[3]) c[3].rotation.set(t.tail1.rx, t.tail1.ry, t.tail1.rz);
-					    if (c[3]?.children[0]) c[3].children[0].rotation.set(t.tail2.rx, t.tail2.ry, t.tail2.rz);
-					}
-				
-				    const dist = cam.position.distanceTo(p.indicator.position);
-				    p.indicator.scale.setScalar(fovFactor * dist * desiredPixels / window.innerHeight);
-				    const worldDown = new THREE.Vector3(0, -1, 0);
-				    worldDown.transformDirection(cam.matrixWorldInverse);
-				    p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
-				}
-
 
 				render.render(scene, cam)
 
