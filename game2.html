@@ -639,8 +639,8 @@
 
 				torso.quaternion.slerp(targetQuat, 0.1);
 				if (s == stanceL[0]) {//running
-					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2.7) * 0.1;
-					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2.7) * 0.1;
+					wing1.rotation.y += ( Math.PI / 4 + Math.PI * 2.7 - wing1.rotation.y) * 0.1;
+					wing2.rotation.y += (-Math.PI / 4 - Math.PI * 2.7 - wing2.rotation.y) * 0.1;
 					tail1.rotation.y += (0 - tail1.rotation.y) * 0.1;
 					tail2.rotation.y += (0 - tail2.rotation.y) * 0.1;
 					head.rotation.x += (0 - head.rotation.x) * 0.1;
@@ -650,13 +650,16 @@
 					wing2.rotation.z += (0 - wing2.rotation.z) * 0.1;
 				}
 				if (s == stanceL[1]) {//sitting
-					tail1.rotation.y += (0.5 - tail1.rotation.y) * 0.1;
-					tail2.rotation.y += (0.5 - tail2.rotation.y) * 0.1;
+					tail1.rotation.z += (0.5 - tail1.rotation.y) * 0.1;
+					tail2.rotation.z += (0.5 - tail2.rotation.y) * 0.1;
 					wing1.rotation.y += ( Math.PI / 4 - wing1.rotation.y - Math.PI * 2) * 0.1;
 					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2) * 0.1;
 					head.rotation.x += (-0.6 - head.rotation.x) * 0.1;
 					head.rotation.y += (0 - head.rotation.y) * 0.1;
 					head.rotation.z += (0 - head.rotation.z) * 0.1;
+				} else {
+					tail1.rotation.z += (0 - tail1.rotation.y) * 0.1;
+					tail2.rotation.z += (0 - tail2.rotation.y) * 0.1;
 				}
 				if (s == stanceL[2]) {//sleeping
 					tail1.rotation.y += (1.4 - tail1.rotation.y) * 0.05;
