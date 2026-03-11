@@ -1045,7 +1045,7 @@
 				    if (!playerData[id]) removePlayer(id);
 				}
 				for (const id in playerData) {
-				    if (!torso) continue;
+				    if (!torso || !gameStarted) break;
 				    if (!otherPlayers[id]) {
 				        otherPlayers[id] = makePlayerMesh(0, 0, 0);
 				    }
