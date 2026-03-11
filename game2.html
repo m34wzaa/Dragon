@@ -13,55 +13,55 @@
 			}
 			#box {
 				display: inline-flex;
-			    flex-direction: column;
-			    gap: 4px;
-			    background: rgba(255, 255, 255, 0.45);
-			    border: 1px solid #ffffff;
-			    padding: 8px 12px;
-			    border-radius: 0px;
+				flex-direction: column;
+				gap: 4px;
+				background: rgba(255, 255, 255, 0.45);
+				border: 1px solid #ffffff;
+				padding: 8px 12px;
+				border-radius: 0px;
 			}
 			#hud {
-			    position: fixed;
-			    top: 10px;
-			    left: 10px;
-			    color: #000000;
-			    font-family: monospace;
-			    font-size: 13px;
-			    pointer-events: none;
-			    text-shadow: 0 0 4px #000;
-			    z-index: 10;
+				position: fixed;
+				top: 10px;
+				left: 10px;
+				color: #000000;
+				font-family: monospace;
+				font-size: 13px;
+				pointer-events: none;
+				text-shadow: 0 0 4px #000;
+				z-index: 10;
 			}
 			#startScreen {
-			    position: fixed;
-			    inset: 0;
-			    background: rgba(0,0,0,0.88);
-			    display: flex;
-			    flex-direction: column;
-			    align-items: center;
-			    justify-content: center;
-			    z-index: 100;
-			    color: #fff;
-			    font-family: monospace;
-			    gap: 14px;
+				position: fixed;
+				inset: 0;
+				background: rgba(0,0,0,0.88);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				z-index: 100;
+				color: #fff;
+				font-family: monospace;
+				gap: 14px;
 			}
 			#startScreen input {
-			    padding: 6px 12px;
-			    font-size: 18px;
-			    background: #111;
-			    color: #ffffff;
-			    border: 1px solid #ffffff;
-			    outline: none;
-			    text-align: center;
-			    width: 120px;
+				padding: 6px 12px;
+				font-size: 18px;
+				background: #111;
+				color: #ffffff;
+				border: 1px solid #ffffff;
+				outline: none;
+				text-align: center;
+				width: 120px;
 			}
 			#startScreen button {
-			    padding: 8px 28px;
-			    background: #ffffff;
-			    color: #000;
-			    border: none;
-			    cursor: pointer;
-			    font-size: 15px;
-			    font-family: monospace;
+				padding: 8px 28px;
+				background: #ffffff;
+				color: #000;
+				border: none;
+				cursor: pointer;
+				font-size: 15px;
+				font-family: monospace;
 			}
 			#pauseMenu {
 				display: none;
@@ -81,30 +81,30 @@
 	</head>
 	<body>
 		<div id="startScreen">
-		    <h2>gaem</h2>
-		    <label>seed</label>
-		    <input id="seedInput" type="number" value="1" min="1">
-		    <button id="playBtn">join</button>
+			<h2>gaem</h2>
+			<label>seed</label>
+			<input id="seedInput" type="number" value="1" min="1">
+			<button id="playBtn">join</button>
 		</div>
 		<div id="hud">
 			<div id="box">
-			    <div id="coords">x: 0 &nbsp; y: 0 &nbsp; z: 0</div>
-			    <div id="seedDisplay">Seed: 1</div>
+				<div id="coords">x: 0 &nbsp; y: 0 &nbsp; z: 0</div>
+				<div id="seedDisplay">Seed: 1</div>
 				<div id="peakDisplay">Peak: - &nbsp; at (-, -, -)</div>
 				<div id="max">max: - &nbsp; 1</div>
 				<div>Render Distance:</div>
 				<input type="range" min="1" max="32" step=1 id="renderDist" style="pointer-events: all;">
 				<button id="peakBtn" onclick="teleportToPeak()" style="
-				    margin-top: 4px;
-				    padding: 3px 10px;
-				    background: #ffffff;
-				    color: #000;
-				    border: none;
-				    cursor: pointer;
-				    font-size: 12px;
-				    font-family: monospace;
-				    pointer-events: all;
-				">go to peak</button>
+					margin-top: 4px;
+					padding: 3px 10px;
+					background: #ffffff;
+					color: #000;
+					border: none;
+					cursor: pointer;
+					font-size: 12px;
+					font-family: monospace;
+					pointer-events: all;
+					">go to peak</button>
 			</div>
 			<div id="pauseMenu">
 				<h2>Stances</h2>
@@ -124,35 +124,35 @@
 			import * as THREE from 'https://unpkg.com/three@latest/build/three.module.js';
 			import { GLTFLoader } from 'https://unpkg.com/three@latest/examples/jsm/loaders/GLTFLoader.js';
 			function createNoise(seed) {
-			    const p = new Uint8Array(512);
-			    const permBase = new Uint8Array(256);
-			    for (let i = 0; i < 256; i++) permBase[i] = i;
-			    let s = seed % 65536 || 1;
-			    for (let i = 255; i > 0; i--) {
-			        s = (s * 16807) % 2147483647;
-			        const j = s % (i + 1);
-			        [permBase[i], permBase[j]] = [permBase[j], permBase[i]];
-			    }
-			    for (let i = 0; i < 512; i++) p[i] = permBase[i & 255];
-			
-			    function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
-			    function lerp(a, b, t) { return a + t * (b - a); }
-			    function grad(h, x, y) {
-			        h &= 3;
-			        const u = h < 2 ? x : y;
-			        const v = h < 2 ? y : x;
-			        return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
-			    }
-			    return function perlin2(x, y) {
-			        const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
-			        x -= Math.floor(x); y -= Math.floor(y);
-			        const u = fade(x), v = fade(y);
-			        const a = p[X] + Y, b = p[X + 1] + Y;
-			        return lerp(
-			            lerp(grad(p[a],   x,   y), grad(p[b],   x-1, y),   u),
-			            lerp(grad(p[a+1], x,   y-1), grad(p[b+1], x-1, y-1), u), v
-			        );
-			    };
+				const p = new Uint8Array(512);
+				const permBase = new Uint8Array(256);
+				for (let i = 0; i < 256; i++) permBase[i] = i;
+				let s = seed % 65536 || 1;
+				for (let i = 255; i > 0; i--) {
+					s = (s * 16807) % 2147483647;
+					const j = s % (i + 1);
+					[permBase[i], permBase[j]] = [permBase[j], permBase[i]];
+				}
+				for (let i = 0; i < 512; i++) p[i] = permBase[i & 255];
+
+				function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+				function lerp(a, b, t) { return a + t * (b - a); }
+				function grad(h, x, y) {
+					h &= 3;
+					const u = h < 2 ? x : y;
+					const v = h < 2 ? y : x;
+					return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+				}
+				return function perlin2(x, y) {
+					const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+					x -= Math.floor(x); y -= Math.floor(y);
+					const u = fade(x), v = fade(y);
+					const a = p[X] + Y, b = p[X + 1] + Y;
+					return lerp(
+						lerp(grad(p[a],   x,   y), grad(p[b],   x-1, y),   u),
+						lerp(grad(p[a+1], x,   y-1), grad(p[b+1], x-1, y-1), u), v
+					);
+				};
 			}
 			const scene = new THREE.Scene();
 			let vel = new THREE.Vector3();
@@ -225,30 +225,30 @@
 				loadGLB('tex2/wing12.glb'),
 				loadGLB('tex2/wing22.glb'),
 			]).then(([h, to, t1, t2, w1, w2]) => {
-			    head = h; torso = to;
-			    tail1 = t1; tail2 = t2;
-			    wing1 = w1; wing2 = w2;
-			
-			    torso.add(head);
-			    torso.add(wing1);
-			    torso.add(wing2);
-			    torso.add(tail1);
-			    tail1.add(tail2);
-			    
-			    head.position.set(0, 0, -0.001);
-			    head.scale.setScalar(0.7);
-			    wing2.position.set(-.0014, -0.0005, -0.001);
-			    wing1.position.set(.0014, -0.0005, -0.001);
-			    tail1.position.set(0, 0, -0.002);
-			    tail2.position.set(0, 0, -0.003);
-			    wing1.rotation.y = -3.6;
-			    wing2.rotation.y = 3.6;
+				head = h; torso = to;
+				tail1 = t1; tail2 = t2;
+				wing1 = w1; wing2 = w2;
+
+				torso.add(head);
+				torso.add(wing1);
+				torso.add(wing2);
+				torso.add(tail1);
+				tail1.add(tail2);
+
+				head.position.set(0, 0, -0.001);
+				head.scale.setScalar(0.7);
+				wing2.position.set(-.0014, -0.0005, -0.001);
+				wing1.position.set(.0014, -0.0005, -0.001);
+				tail1.position.set(0, 0, -0.002);
+				tail2.position.set(0, 0, -0.003);
+				wing1.rotation.y = -3.6;
+				wing2.rotation.y = 3.6;
 				head.rotation.y = 0;
-			
-			    torso.scale.setScalar(200);
-			    scene.add(torso);
-			
-			    torso.scale.setScalar(200);
+
+				torso.scale.setScalar(200);
+				scene.add(torso);
+
+				torso.scale.setScalar(200);
 				scene.add(torso);
 				torso.position.set(0, 500, 0);
 				vel.set(0, 0, -0.5);
@@ -281,107 +281,107 @@
 			slider.addEventListener('input', () => {
 				VIEW_DIST = Number(slider.value);
 			});
-			
+
 			function chunkKey(cx, cz) { return `${cx},${cz}`; }
-			
+
 			function makeChunk(cx, cz) {
-			    const geo = new THREE.PlaneGeometry(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SEGS, CHUNK_SEGS);
-			    geo.rotateX(-Math.PI / 2);
-			    const pos = geo.attributes.position;
-			
-			    for (let i = 0; i < pos.count; i++) {
-			        const wx = pos.getX(i) + cx * CHUNK_SIZE; // world x
-			        const wz = pos.getZ(i) + cz * CHUNK_SIZE; // world z
-			
+				const geo = new THREE.PlaneGeometry(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SEGS, CHUNK_SEGS);
+				geo.rotateX(-Math.PI / 2);
+				const pos = geo.attributes.position;
+
+				for (let i = 0; i < pos.count; i++) {
+					const wx = pos.getX(i) + cx * CHUNK_SIZE; // world x
+					const wz = pos.getZ(i) + cz * CHUNK_SIZE; // world z
+
 					const raw =
-					    perlin2(wx * 0.003, wz * 0.003) * 1.0 +
+						perlin2(wx * 0.003, wz * 0.003) * 1.0 +
 						perlin2(wx * 0.012, wz * 0.012) * 0.3 +
 						perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
-					
+
 					// shift raw up so it's always positive (range was ~-1.4 to 1.4, now 0 to 2.8)
 					const shifted = raw + 1.4;
-					
+
 					// sharpen peaks without creating hard cliffs
 					const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
-					
+
 					const h = sharp * 500;
 
-			
-			        pos.setY(i, h);
-			    }
-			    pos.needsUpdate = true;
-			    geo.computeVertexNormals();
+
+					pos.setY(i, h);
+				}
+				pos.needsUpdate = true;
+				geo.computeVertexNormals();
 				const normals = geo.attributes.normal;
 				const colors  = new Float32Array(pos.count * 3);
-				
+
 				for (let i = 0; i < pos.count; i++) {
-				    const ny = normals.getY(i);
-				
-				    const c = THREE.MathUtils.clamp((ny - 0.5) / 0.5, 0.15, 1.0);;
-				    colors[i * 3]     = c;  // R
-				    colors[i * 3 + 1] = c;  // G
-				    colors[i * 3 + 2] = c;  // B
+					const ny = normals.getY(i);
+
+					const c = THREE.MathUtils.clamp((ny - 0.5) / 0.5, 0.15, 1.0);;
+					colors[i * 3]     = c;  // R
+					colors[i * 3 + 1] = c;  // G
+					colors[i * 3 + 2] = c;  // B
 				}
 				geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-				
+
 				const mat = new THREE.MeshStandardMaterial({
-				    vertexColors: true,
-				    flatShading: false
+					vertexColors: true,
+					flatShading: false
 				});
-			
-			    const mesh = new THREE.Mesh(geo, mat);
-			    mesh.position.set(cx * CHUNK_SIZE, 0, cz * CHUNK_SIZE);
-			    scene.add(mesh);
-			    groundMeshes.push(mesh);
+
+				const mesh = new THREE.Mesh(geo, mat);
+				mesh.position.set(cx * CHUNK_SIZE, 0, cz * CHUNK_SIZE);
+				scene.add(mesh);
+				groundMeshes.push(mesh);
 				scanChunkForPeak(cx, cz)
-			    return mesh;
+				return mesh;
 			}
-			
+
 			function updateChunks() {
-			    if (!torso || !gameStarted || !perlin2) return;
-			
-			    const cx = Math.round(torso.position.x / CHUNK_SIZE);
-			    const cz = Math.round(torso.position.z / CHUNK_SIZE);
-			
-			    for (let dx = -VIEW_DIST; dx <= VIEW_DIST; dx++) {
-			        for (let dz = -VIEW_DIST; dz <= VIEW_DIST; dz++) {
-			            const key = chunkKey(cx + dx, cz + dz);
-			            if (!chunks[key]) {
-			                chunks[key] = makeChunk(cx + dx, cz + dz);
-			            }
-			        }
-			    }
-			
-			    for (const key in chunks) {
-			        const [kcx, kcz] = key.split(',').map(Number);
-			        if (Math.abs(kcx - cx) > VIEW_DIST + 1 || Math.abs(kcz - cz) > VIEW_DIST + 1) {
-			            scene.remove(chunks[key]);
-			            groundMeshes.splice(groundMeshes.indexOf(chunks[key]), 1);
-			            chunks[key].geometry.dispose();
-			            delete chunks[key];
-			        }
-			    }
+				if (!torso || !gameStarted || !perlin2) return;
+
+				const cx = Math.round(torso.position.x / CHUNK_SIZE);
+				const cz = Math.round(torso.position.z / CHUNK_SIZE);
+
+				for (let dx = -VIEW_DIST; dx <= VIEW_DIST; dx++) {
+					for (let dz = -VIEW_DIST; dz <= VIEW_DIST; dz++) {
+						const key = chunkKey(cx + dx, cz + dz);
+						if (!chunks[key]) {
+							chunks[key] = makeChunk(cx + dx, cz + dz);
+						}
+					}
+				}
+
+				for (const key in chunks) {
+					const [kcx, kcz] = key.split(',').map(Number);
+					if (Math.abs(kcx - cx) > VIEW_DIST + 1 || Math.abs(kcz - cz) > VIEW_DIST + 1) {
+						scene.remove(chunks[key]);
+						groundMeshes.splice(groundMeshes.indexOf(chunks[key]), 1);
+						chunks[key].geometry.dispose();
+						delete chunks[key];
+					}
+				}
 			}
 			function scanChunkForPeak(cx, cz) {
-			    const step = 1; // finer scan per chunk
-			    for (let wx = cx * CHUNK_SIZE; wx <= (cx + 1) * CHUNK_SIZE; wx += step) {
-			        for (let wz = cz * CHUNK_SIZE; wz <= (cz + 1) * CHUNK_SIZE; wz += step) {
-			            const raw =
-			                perlin2(wx * 0.003, wz * 0.003) * 1.0 +
-			                perlin2(wx * 0.012, wz * 0.012) * 0.3 +
-			                perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
-			            const shifted = raw + 1.4;
-			            const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
-			            const h = sharp * 500;
-			            if (h > peakY) {
-			                peakY = h;
-			                peakX = wx;
-			                peakZ = wz;
-			                document.getElementById('peakDisplay').textContent =
-			                    `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
-			            }
-			        }
-			    }
+				const step = 1; // finer scan per chunk
+				for (let wx = cx * CHUNK_SIZE; wx <= (cx + 1) * CHUNK_SIZE; wx += step) {
+					for (let wz = cz * CHUNK_SIZE; wz <= (cz + 1) * CHUNK_SIZE; wz += step) {
+						const raw =
+							perlin2(wx * 0.003, wz * 0.003) * 1.0 +
+							perlin2(wx * 0.012, wz * 0.012) * 0.3 +
+							perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
+						const shifted = raw + 1.4;
+						const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
+						const h = sharp * 500;
+						if (h > peakY) {
+							peakY = h;
+							peakX = wx;
+							peakZ = wz;
+							document.getElementById('peakDisplay').textContent =
+								`Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
+						}
+					}
+				}
 			}
 
 			let peakSearchRadius = 0;
@@ -389,78 +389,78 @@
 			const PEAK_SEARCH_RING = 1200;
 			let maxx = 0;
 			async function findPeak() {
-			    document.getElementById('peakDisplay').textContent = `Peak: searching...`;
-			    let x = 0, z = 0;
-			    let step = 1, stepCount = 0, dir = 0, turns = 0;
-			    const STEP = 1; 
-			    const dx = [STEP, 0, -STEP, 0];
-			    const dz = [0, STEP, 0, -STEP];
-			    let batch = 0;
-			
-			    while (true) {
-			        const raw =
-			            perlin2(x * 0.003, z * 0.003) * 1.0 +
-			            perlin2(x * 0.012, z * 0.012) * 0.3 +
-			            perlin2(x * 0.04,  z * 0.04)  * 0.08;
-			        const shifted = raw + 1.4;
-			        const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
-			        const h = sharp * 500;
-			        if (h > peakY) {
-			            peakY = h; peakX = x; peakZ = z;
-			            document.getElementById('peakDisplay').textContent =
-			                `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
-			            refinePeak();
-			        }
-			
-			        x += dx[dir];
-			        z += dz[dir];
-			        stepCount++;
-			        if (stepCount === step) {
-			            stepCount = 0;
-			            dir = (dir + 1) % 4;
-			            turns++;
-			            if (turns % 2 === 0) step++;
-			        }
-			
-			        if (++batch >= 50000) {
+				document.getElementById('peakDisplay').textContent = `Peak: searching...`;
+				let x = 0, z = 0;
+				let step = 1, stepCount = 0, dir = 0, turns = 0;
+				const STEP = 1; 
+				const dx = [STEP, 0, -STEP, 0];
+				const dz = [0, STEP, 0, -STEP];
+				let batch = 0;
+
+				while (true) {
+					const raw =
+						perlin2(x * 0.003, z * 0.003) * 1.0 +
+						perlin2(x * 0.012, z * 0.012) * 0.3 +
+						perlin2(x * 0.04,  z * 0.04)  * 0.08;
+					const shifted = raw + 1.4;
+					const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
+					const h = sharp * 500;
+					if (h > peakY) {
+						peakY = h; peakX = x; peakZ = z;
+						document.getElementById('peakDisplay').textContent =
+							`Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
+						refinePeak();
+					}
+
+					x += dx[dir];
+					z += dz[dir];
+					stepCount++;
+					if (stepCount === step) {
+						stepCount = 0;
+						dir = (dir + 1) % 4;
+						turns++;
+						if (turns % 2 === 0) step++;
+					}
+
+					if (++batch >= 50000) {
 						if (Math.max(Math.abs(x),Math.abs(z)) > maxx) {
 							maxx = Math.max(Math.abs(x),Math.abs(z));
 							document.getElementById('max').textContent = `max: ${maxx}`;
 						}
-			            batch = 0;
-			            await new Promise(r => setTimeout(r, 0));
-			        }
-			    }
+						batch = 0;
+						await new Promise(r => setTimeout(r, 0));
+					}
+				}
 			}
 
 
 			async function refinePeak() {
-			    const step = 1;
-			    const margin = 200;
-			    const refineX = peakX, refineZ = peakZ; // snapshot so it doesn't chase a moving target
-			    for (let wx = refineX - margin; wx <= refineX + margin; wx += step) {
-			        for (let wz = refineZ - margin; wz <= refineZ + margin; wz += step) {
-			            const raw =
-			                perlin2(wx * 0.003, wz * 0.003) * 1.0 +
-			                perlin2(wx * 0.012, wz * 0.012) * 0.3 +
-			                perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
-			            const shifted = raw + 1.4;
-			            const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
-			            const h = sharp * 500;
-			            if (h > peakY) {
-			                peakY = h; peakX = wx; peakZ = wz;
-			                document.getElementById('peakDisplay').textContent =
-			                    `Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
-			            }
-			        }
-			        await new Promise(r => setTimeout(r, 0));
-			    }
+				const step = 1;
+				const margin = 200;
+				const refineX = peakX, refineZ = peakZ; // snapshot so it doesn't chase a moving target
+				for (let wx = refineX - margin; wx <= refineX + margin; wx += step) {
+					for (let wz = refineZ - margin; wz <= refineZ + margin; wz += step) {
+						const raw =
+							perlin2(wx * 0.003, wz * 0.003) * 1.0 +
+							perlin2(wx * 0.012, wz * 0.012) * 0.3 +
+							perlin2(wx * 0.04,  wz * 0.04)  * 0.08;
+						const shifted = raw + 1.4;
+						const sharp = Math.pow(shifted / 2.8, 6) * 2.8;
+						const h = sharp * 500;
+						if (h > peakY) {
+							peakY = h; peakX = wx; peakZ = wz;
+							document.getElementById('peakDisplay').textContent =
+								`Peak: ${peakY.toFixed(0)}  at (${peakX.toFixed(0)}, ${peakY.toFixed(0)}, ${peakZ.toFixed(0)})`;
+						}
+					}
+					await new Promise(r => setTimeout(r, 0));
+				}
 			}
 			function teleportToPeak() {
-			    if (!torso || peakY === -Infinity) return;
-			    torso.position.set(peakX - 20, peakY - 2, peakZ);
-			    vel.set(0.01, 0, 0);
-				stance = 'isFlying'
+				if (!torso || peakY === -Infinity) return;
+				torso.position.set(peakX - 20, peakY - 2, peakZ);
+				vel.set(0.01, 0, 0);
+				isFlying = true
 				cam.position.set(peakX - 23, peakY, peakZ)
 				torso.lookAt(peakX, peakY - 2, peakZ);
 			}
@@ -509,87 +509,87 @@
 			let myId = null;
 			const otherPlayers = {};
 			const socket = new WebSocket('wss://dragon-production-988c.up.railway.app');
-			
+
 			function makeIndicator() {
-			    const canvas = document.createElement('canvas');
-			    canvas.width = 64; canvas.height = 64;
-			    const ctx = canvas.getContext('2d');
-			
-			    // Downward-pointing arrow
-			    ctx.fillStyle = '#00eeff';
-			    ctx.shadowColor = '#00eeff';
-			    ctx.shadowBlur = 10;
-			    ctx.beginPath();
-			    ctx.moveTo(32, 54);   // tip
-			    ctx.lineTo(10, 14);   // top-left
-			    ctx.lineTo(54, 14);   // top-right
-			    ctx.closePath();
-			    ctx.fill();
-			
-			    const texture = new THREE.CanvasTexture(canvas);
-			    const mat = new THREE.SpriteMaterial({
-			        map: texture,
-			        depthTest: false,
-			        transparent: true
-			    });
-			    const sprite = new THREE.Sprite(mat);
-			    sprite.scale.setScalar(10); 
-			    scene.add(sprite);
-			    return sprite;
+				const canvas = document.createElement('canvas');
+				canvas.width = 64; canvas.height = 64;
+				const ctx = canvas.getContext('2d');
+
+				// Downward-pointing arrow
+				ctx.fillStyle = '#00eeff';
+				ctx.shadowColor = '#00eeff';
+				ctx.shadowBlur = 10;
+				ctx.beginPath();
+				ctx.moveTo(32, 54);   // tip
+				ctx.lineTo(10, 14);   // top-left
+				ctx.lineTo(54, 14);   // top-right
+				ctx.closePath();
+				ctx.fill();
+
+				const texture = new THREE.CanvasTexture(canvas);
+				const mat = new THREE.SpriteMaterial({
+					map: texture,
+					depthTest: false,
+					transparent: true
+				});
+				const sprite = new THREE.Sprite(mat);
+				sprite.scale.setScalar(10); 
+				scene.add(sprite);
+				return sprite;
 			}
 
 			function makePlayerMesh(x, y, z) {
-			    const clone = torso.clone();
-			    scene.add(clone);
-			    const indicator = makeIndicator();
-			    indicator.position.set(x, y + 2, z);
-			    return { mesh: clone, indicator };
+				const clone = torso.clone();
+				scene.add(clone);
+				const indicator = makeIndicator();
+				indicator.position.set(x, y + 2, z);
+				return { mesh: clone, indicator };
 			}
 
 
 
-			
 
-			
+
+
 			socket.addEventListener('message', (e) => {
-			    const msg = JSON.parse(e.data);
-			
-			    if (msg.type === 'init') {
-			        myId = msg.id;
-			    }
-			
-			    if (msg.id === myId) return;
-			
-			    if (msg.type === 'move') {
-				    if (msg.worldSeed !== undefined && msg.worldSeed !== WORLD_SEED) {
-				        if (otherPlayers[msg.id]) {
-				            scene.remove(otherPlayers[msg.id].mesh);
-				            scene.remove(otherPlayers[msg.id].indicator);
-				            otherPlayers[msg.id].indicator.material.dispose();
-				            delete otherPlayers[msg.id];
-				        }
-				        return;
-				    }
-				    if (!otherPlayers[msg.id] && torso) { // ← combined into one clean check
-				        otherPlayers[msg.id] = makePlayerMesh(msg.pos.x, msg.pos.y, msg.pos.z);
-				    }
-				    if (!otherPlayers[msg.id]) return; // torso not ready yet, try next frame
-				    const p = otherPlayers[msg.id];
+				const msg = JSON.parse(e.data);
+
+				if (msg.type === 'init') {
+					myId = msg.id;
+				}
+
+				if (msg.id === myId) return;
+
+				if (msg.type === 'move') {
+					if (msg.worldSeed !== undefined && msg.worldSeed !== WORLD_SEED) {
+						if (otherPlayers[msg.id]) {
+							scene.remove(otherPlayers[msg.id].mesh);
+							scene.remove(otherPlayers[msg.id].indicator);
+							otherPlayers[msg.id].indicator.material.dispose();
+							delete otherPlayers[msg.id];
+						}
+						return;
+					}
+					if (!otherPlayers[msg.id] && torso) { // ← combined into one clean check
+						otherPlayers[msg.id] = makePlayerMesh(msg.pos.x, msg.pos.y, msg.pos.z);
+					}
+					if (!otherPlayers[msg.id]) return; // torso not ready yet, try next frame
+					const p = otherPlayers[msg.id];
 					p.mesh.position.set(msg.pos.x, msg.pos.y, msg.pos.z);
 					p.mesh.quaternion.set(msg.quat.x, msg.quat.y, msg.quat.z, msg.quat.w);
 					p.targetWing = msg.wing;
 					p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
-				    p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
+					p.indicator.position.set(msg.pos.x, msg.pos.y + 2, msg.pos.z);
 				}
 
 
-			
-			    if (msg.type === 'leave' && otherPlayers[msg.id]) {
-			        scene.remove(otherPlayers[msg.id].mesh);
-			        scene.remove(otherPlayers[msg.id].indicator);
-			        otherPlayers[msg.id].indicator.material.dispose();
-			        delete otherPlayers[msg.id];
-			    }
+
+				if (msg.type === 'leave' && otherPlayers[msg.id]) {
+					scene.remove(otherPlayers[msg.id].mesh);
+					scene.remove(otherPlayers[msg.id].indicator);
+					otherPlayers[msg.id].indicator.material.dispose();
+					delete otherPlayers[msg.id];
+				}
 			});
 
 			render.setSize(window.innerWidth, window.innerHeight);
@@ -609,11 +609,11 @@
 				keys[e.key] = false
 			});
 			window.addEventListener('keydown', (e) => {
-			    if (e.key === 'p' || e.key === 'Escape') {
-			        paused = !paused;
-			        document.getElementById('pauseMenu').style.display = paused ? 'block' : 'none';
+				if (e.key === 'p' || e.key === 'Escape') {
+					paused = !paused;
+					document.getElementById('pauseMenu').style.display = paused ? 'block' : 'none';
 					if (paused == true) openStance();
-			    }
+				}
 			});
 			function land(s) {
 				seed = seed / 1.1;
@@ -643,7 +643,7 @@
 					wing2.rotation.y += (-Math.PI / 4 - wing2.rotation.y + Math.PI * 2.2) * 0.1;
 				}
 				if (s == stanceL[1]) {//sitting
-					
+
 				}
 				if (s == stanceL[2]) {//sleeping
 					tail1.rotation.y = 1.4
@@ -661,19 +661,19 @@
 				}
 			}
 			document.getElementById('playBtn').addEventListener('click', () => {
-			    WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
-			    perlin2 = createNoise(WORLD_SEED);
-			    document.getElementById('startScreen').style.display = 'none';
-			    document.getElementById('seedDisplay').textContent = 'Seed: ' + WORLD_SEED;
-			    gameStarted = true;
+				WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
+				perlin2 = createNoise(WORLD_SEED);
+				document.getElementById('startScreen').style.display = 'none';
+				document.getElementById('seedDisplay').textContent = 'Seed: ' + WORLD_SEED;
+				gameStarted = true;
 				findPeak();
 			});
 
 
 
 			function openStance() {
-			    const menu = document.getElementById('pauseMenu');
-			    menu.innerHTML = `
+				const menu = document.getElementById('pauseMenu');
+				menu.innerHTML = `
 			        <b style="font-size:16px; margin-bottom:8px;">— stances —</b>
 			        <p style="font-size:11px; margin-bottom:12px; opacity:0.6;">only active on ground</p>
 			        <div id="stanceGrid" style="
@@ -683,13 +683,13 @@
 			            width: 260px;
 			        "></div>
 			    `;
-			
-			    const grid = document.getElementById('stanceGrid');
-			
-			    stanceL.forEach(name => {
-			        const btn = document.createElement('button');
-			        btn.textContent = name.replace('is', '').toLowerCase(); // "isRunning" → "running"
-			        btn.style.cssText = `
+
+				const grid = document.getElementById('stanceGrid');
+
+				stanceL.forEach(name => {
+					const btn = document.createElement('button');
+					btn.textContent = name.replace('is', '').toLowerCase(); // "isRunning" → "running"
+					btn.style.cssText = `
 			            padding: 10px 0;
 			            background: ${stance === name ? '#ffffff' : 'transparent'};
 			            color: ${stance === name ? '#000' : '#fff'};
@@ -698,12 +698,12 @@
 			            font-family: monospace;
 			            font-size: 13px;
 			        `;
-			        btn.addEventListener('click', () => {
-			            stance = name;
-			            openStance(); // re-render to update highlight
-			        });
-			        grid.appendChild(btn);
-			    });
+					btn.addEventListener('click', () => {
+						stance = name;
+						openStance(); // re-render to update highlight
+					});
+					grid.appendChild(btn);
+				});
 			}
 			window.openStance = openStance;
 
@@ -744,13 +744,13 @@
 			const surfaceNormal = new THREE.Vector3(0, 1, 0); 
 
 			let stanceL = ['isRunning', 'isSitting', 'isSleeping', 'isDefensive', 'none']
-			let stance = 'isFlying' // can be flying if in air, sitting, running, walking, sleeping or none.
+			let stance = 'none' // can be flying if in air, sitting, running, walking, sleeping or none.
 			// running would make it faster, and also add a forward backward movement, and also move the tail up and down to account for movement
 			// sitting would prop the drag up so itll be basically sitting with its tail flat with the ground
 			// sleeping would make it curl up and sleep
 			// defensive will make it enter a defensive stance that it can also (hopefully soon) attack other dregs
 			// all of these will only send the wing rot and other stuff to the server
-			
+			let isFlying = true
 			let peakY = -Infinity;
 			let peakX = 0, peakZ = 0;
 			let paused = false;
@@ -758,7 +758,7 @@
 
 
 
-			
+
 			function anim() {
 				requestAnimationFrame(anim);
 				updateChunks();
@@ -795,7 +795,10 @@
 					let pitching = 0;
 					let yawing = 0;
 					if (!paused) {
-						if (onGround && stance == 'isFlying') stance = 'none';
+						if (onGround && isFlying) {
+							stance = 'none';
+							isFlying = false;
+						}
 						if (keys['d']) { 
 							if (onGround) {
 								if (stance == stanceL[0]) torso.rotateOnAxis(yaxis, -0.02);
@@ -847,8 +850,8 @@
 							}
 						}
 						if (keys[' ']) {
-							if (onGround && !(stance == 'isFlying')) {
-								stance = 'isFlying';
+							if (onGround && !(isFlying)) {
+								isFlying = true;
 								vel.addScaledVector(up, 1);
 								vel.addScaledVector(forw, 0.4);
 							} 
@@ -858,7 +861,7 @@
 							console.log(wing2.rotation.y);
 							console.log(head.rotation.y);
 						}
-	
+
 						if (keys['j'] && !keys['k']) {
 							plus += (0.5 - plus) * 0.1;
 							if (plus > 0.49) plus = 0.5;
@@ -873,25 +876,25 @@
 						}
 						// --- PHYSICS ---
 						torso.getWorldDirection(forw);
-	
+
 						const wingFactor = THREE.MathUtils.clamp(
 							(wing2.rotation.y - minrot) / (maxrot - minrot), 0, 1
 						);
 						const dragonUp = new THREE.Vector3(0, 1, 0).applyQuaternion(torso.quaternion);
 						const uprightness = THREE.MathUtils.clamp(dragonUp.dot(up), 0, 1);
 						const lift = uprightness * (1 - wingFactor);
-	
+
 						vel.y -= 0.01 * (1 - lift);
-						if (stance == 'isFlying') vel.addScaledVector(forw, 0.02 + (plus * 0.06));
+						if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.06));
 						vel.multiplyScalar(0.96);
 						let speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
 						//if (keys['k'] && !keys['j']) speedCap = THREE.MathUtils.lerp(1.5, 0.25, wingFactor);
 						//if (keys['j'] && !keys['k']) speedCap = THREE.MathUtils.lerp(6.0, 1, wingFactor);
-						
+
 						vel.clampLength(0, speedCap);
-	
+
 						torso.position.add(vel);
-	
+
 						if (torso.position.y < groundY) {
 							torso.position.y = groundY;
 							stance = 'none'; 
@@ -911,16 +914,16 @@
 					document.getElementById('coords').textContent =`X: ${torso.position.x.toFixed(0)}  Y: ${torso.position.y.toFixed(0)}  Z: ${torso.position.z.toFixed(0)}`;
 					// send position to server every frame
 					if (socket.readyState === 1 && myId && torso && gameStarted) {
-					    const q = torso.quaternion;
-					    socket.send(JSON.stringify({
-					        type: 'move',
+						const q = torso.quaternion;
+						socket.send(JSON.stringify({
+							type: 'move',
 							worldSeed: WORLD_SEED,
-					        pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
-					        quat: { x: q.x, y: q.y, z: q.z, w: q.w },
-					        vel:  { x: vel.x, y: vel.y, z: vel.z },
-					        wing: wing2.rotation.y,
-					        seed: seed
-					    }));
+							pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
+							quat: { x: q.x, y: q.y, z: q.z, w: q.w },
+							vel:  { x: vel.x, y: vel.y, z: vel.z },
+							wing: wing2.rotation.y,
+							seed: seed
+						}));
 					}
 
 
@@ -936,36 +939,36 @@
 					cam.lookAt(headpos);
 					//--- ANIM ---
 					if (!onGround) {
-					    const targetFlapSpeed = 0.05 + seed * 0.07 + plus * 0.05;
-					    flapSpeed += (targetFlapSpeed - flapSpeed) * 0.04;
-					    flapPhase += flapSpeed;
-					
-					    const targetY2 = Math.min((seed * 2) + Math.PI + plus, 4.6);
-					    const targetY1 = Math.max((-seed * 2) - Math.PI - plus, -4.6);
-					    wing2.rotation.y += (targetY2 - wing2.rotation.y) * 0.07;
-					    wing1.rotation.y += (targetY1 - wing1.rotation.y) * 0.07;
-					
-					    const flapAmp = Math.max(0, (0.55 - seed + plus * 0.25)) * 0.9;
-					    const flapTarget1 =  Math.sin(flapPhase) * flapAmp;
-					    const flapTarget2 = -Math.sin(flapPhase) * flapAmp;
-					    wing1.rotation.z += (flapTarget1 - wing1.rotation.z) * 0.12;
-					    wing2.rotation.z += (flapTarget2 - wing2.rotation.z) * 0.12;
+						const targetFlapSpeed = 0.05 + seed * 0.07 + plus * 0.05;
+						flapSpeed += (targetFlapSpeed - flapSpeed) * 0.04;
+						flapPhase += flapSpeed;
+
+						const targetY2 = Math.min((seed * 2) + Math.PI + plus, 4.6);
+						const targetY1 = Math.max((-seed * 2) - Math.PI - plus, -4.6);
+						wing2.rotation.y += (targetY2 - wing2.rotation.y) * 0.07;
+						wing1.rotation.y += (targetY1 - wing1.rotation.y) * 0.07;
+
+						const flapAmp = Math.max(0, (0.55 - seed + plus * 0.25)) * 0.9;
+						const flapTarget1 =  Math.sin(flapPhase) * flapAmp;
+						const flapTarget2 = -Math.sin(flapPhase) * flapAmp;
+						wing1.rotation.z += (flapTarget1 - wing1.rotation.z) * 0.12;
+						wing2.rotation.z += (flapTarget2 - wing2.rotation.z) * 0.12;
 					}
 
 				}
 				sky.position.copy(cam.position);
 				cam.updateMatrixWorld();
 				const fovFactor = 2 * Math.tan(THREE.MathUtils.degToRad(fov / 2));
-	            const desiredPixels = 22;
+				const desiredPixels = 22;
 
-	            for (const id in otherPlayers) {
-	                const p = otherPlayers[id];
-	                const d = cam.position.distanceTo(p.indicator.position);
-	                p.indicator.scale.setScalar(fovFactor * d * desiredPixels / window.innerHeight);
-	                const worldDown = new THREE.Vector3(0, -1, 0);
-	                worldDown.transformDirection(cam.matrixWorldInverse);
-	                p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
-	            }
+				for (const id in otherPlayers) {
+					const p = otherPlayers[id];
+					const d = cam.position.distanceTo(p.indicator.position);
+					p.indicator.scale.setScalar(fovFactor * d * desiredPixels / window.innerHeight);
+					const worldDown = new THREE.Vector3(0, -1, 0);
+					worldDown.transformDirection(cam.matrixWorldInverse);
+					p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
+				}
 				render.render(scene, cam)
 
 			}
