@@ -857,7 +857,8 @@
 					}
 
 
-					const onGround = torso.position.y <= groundY + 0.1;
+					const sitOffset = stance === stanceL[1] ? 0.7 : 0;
+					const onGround = torso.position.y <= groundY + sitOffset + 0.1;
 					// --- ROTATION ---
 					let rolling = 0;
 					let pitching = 0;
@@ -963,18 +964,20 @@
 
 						torso.position.add(vel);
 						if (torso.position.y <= groundY) {
-							torso.position.y = groundY;
-							vel.y = 0; // ← kill vertical on ground
-							isFlying = false;
-							if (!(keys['w'] || keys['s'])) {
-								vel.x *= 0.8;
-								vel.z *= 0.8;
-							}
+						    torso.position.y = stance === stanceL[1] ? groundY + 0.7 : groundY; // ← add this
+						    vel.y = 0;
+						    isFlying = false;
+						    if (!(keys['w'] || keys['s'])) {
+						        vel.x *= 0.8;
+						        vel.z *= 0.8;
+						    }
 						}
+						
+						// second clamp
 						if (torso.position.y < groundY) {
-							torso.position.y = groundY;
-							stance = 'none'; 
-							if (!(keys['w'] || keys['s'])) vel.set(vel.x * 0.8, vel.y * 0.8, vel.z * 0.8);
+						    torso.position.y = stance === stanceL[1] ? groundY + 0.7 : groundY; // ← add this
+						    stance = 'none';
+						    if (!(keys['w'] || keys['s'])) vel.set(vel.x * 0.8, vel.y * 0.8, vel.z * 0.8);
 						}
 						if (onGround) {
 							land(stance);
