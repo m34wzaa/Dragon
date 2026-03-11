@@ -68,7 +68,7 @@
 				position: fixed;
 				inset: 0;
 				background: rgba(0, 0, 0, 0.85);
-				color: #000;
+				color: #fff;
 				border: none;
 				cursor: default;
 				font-size: 25px;
@@ -107,8 +107,7 @@
 				">go to peak</button>
 			</div>
 			<div id="pauseMenu">
-				<button id="stanceMenu" onclick="openStance()" style="
-					">stances</button>
+				<h2>Stances</h2>
 			</div>
 		</div>
 
@@ -673,9 +672,40 @@
 
 
 			function openStance() {
-				const menu = document.getElementById('pauseMenu');
-				menu.innerHTML = '<b style="font-size:14px">— stances —</b><br><br>';
+			    const menu = document.getElementById('pauseMenu');
+			    menu.innerHTML = `
+			        <b style="font-size:16px; margin-bottom:8px;">— stances —</b>
+			        <p style="font-size:11px; margin-bottom:12px; opacity:0.6;">only active on ground</p>
+			        <div id="stanceGrid" style="
+			            display: grid;
+			            grid-template-columns: 1fr 1fr;
+			            gap: 8px;
+			            width: 260px;
+			        "></div>
+			    `;
+			
+			    const grid = document.getElementById('stanceGrid');
+			
+			    stanceL.forEach(name => {
+			        const btn = document.createElement('button');
+			        btn.textContent = name.replace('is', '').toLowerCase(); // "isRunning" → "running"
+			        btn.style.cssText = `
+			            padding: 10px 0;
+			            background: ${stance === name ? '#ffffff' : 'transparent'};
+			            color: ${stance === name ? '#000' : '#fff'};
+			            border: 1px solid #ffffff;
+			            cursor: pointer;
+			            font-family: monospace;
+			            font-size: 13px;
+			        `;
+			        btn.addEventListener('click', () => {
+			            stance = name;
+			            openStance(); // re-render to update highlight
+			        });
+			        grid.appendChild(btn);
+			    });
 			}
+			window.openStance = openStance;
 
 
 
