@@ -538,19 +538,21 @@
 			}
 
 			function makePlayerMesh(x, y, z) {
-				const clone = torso.clone();
-				scene.add(clone);
-				const indicator = makeIndicator();
-				indicator.position.set(x, y + 2, z);
-				return {
-					mesh:   clone,
-					cHead:  clone.getObjectByName('dreg_head'),
-					cWing1: clone.getObjectByName('dreg_wing1'),
-					cWing2: clone.getObjectByName('dreg_wing2'),
-					cTail1: clone.getObjectByName('dreg_tail1'),
-					cTail2: clone.getObjectByName('dreg_tail2'),
-					indicator
-				};
+			    const clone = torso.clone();
+			    scene.add(clone);
+			    const indicator = makeIndicator();
+			    indicator.position.set(x, y + 2, z);
+			
+			    // children order matches torso.add() call order
+			    const cHead  = clone.children[0]; // head
+			    const cWing1 = clone.children[1]; // wing1
+			    const cWing2 = clone.children[2]; // wing2
+			    const cTail1 = clone.children[3]; // tail1
+			    const cTail2 = cTail1.children[0]; // tail2 (child of tail1)
+			
+			    console.log(cHead, cWing1, cWing2, cTail1, cTail2); // verify none are null
+			
+			    return { mesh: clone, cHead, cWing1, cWing2, cTail1, cTail2, indicator };
 			}
 
 
