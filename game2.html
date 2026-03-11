@@ -228,18 +228,16 @@
 				head = h; torso = to;
 				tail1 = t1; tail2 = t2;
 				wing1 = w1; wing2 = w2;
-
 				torso.add(head);
 				torso.add(wing1);
 				torso.add(wing2);
 				torso.add(tail1);
 				tail1.add(tail2);
-				head.name  = 'head';
-				wing1.name = 'wing1';
-				wing2.name = 'wing2';
-				tail1.name = 'tail1';
-				tail2.name = 'tail2';
-
+				head.name  = 'dreg_head';
+				wing1.name = 'dreg_wing1';
+				wing2.name = 'dreg_wing2';
+				tail1.name = 'dreg_tail1';
+				tail2.name = 'dreg_tail2';
 				head.position.set(0, 0, -0.001);
 				head.scale.setScalar(0.7);
 				wing2.position.set(-.0014, -0.0005, -0.001);
@@ -249,10 +247,6 @@
 				wing1.rotation.y = -3.6;
 				wing2.rotation.y = 3.6;
 				head.rotation.y = 0;
-
-				torso.scale.setScalar(200);
-				scene.add(torso);
-
 				torso.scale.setScalar(200);
 				scene.add(torso);
 				torso.position.set(0, 500, 0);
@@ -279,7 +273,7 @@
 			let perlin2 = null;
 			let gameStarted = false;
 			const CHUNK_SIZE = 100;
-			const CHUNK_SEGS = 100;
+			const CHUNK_SEGS = 50;
 			let VIEW_DIST  = 8; 
 			const chunks = {};
 			const slider = document.getElementById("renderDist")
@@ -550,11 +544,11 @@
 				indicator.position.set(x, y + 2, z);
 				return {
 					mesh:   clone,
-					cHead:  clone.getObjectByName('head'),
-					cWing1: clone.getObjectByName('wing1'),
-					cWing2: clone.getObjectByName('wing2'),
-					cTail1: clone.getObjectByName('tail1'),
-					cTail2: clone.getObjectByName('tail2'),
+					cHead:  clone.getObjectByName('dreg_head'),
+					cWing1: clone.getObjectByName('dreg_wing1'),
+					cWing2: clone.getObjectByName('dreg_wing2'),
+					cTail1: clone.getObjectByName('dreg_tail1'),
+					cTail2: clone.getObjectByName('dreg_tail2'),
 					indicator
 				};
 			}
