@@ -157,7 +157,7 @@
 			const scene = new THREE.Scene();
 			let vel = new THREE.Vector3();
 			scene.background = new THREE.Color(0x222222);
-			let dist = 5000;
+			let dist = 50000;
 			scene.fog = new THREE.Fog(0x222222, dist - (dist * 0.1), dist);
 			let fov = 90;
 			const cam = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.01, dist);
