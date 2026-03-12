@@ -776,18 +776,27 @@
 			}
 			window.openStance = openStance;
 			function fire() {
-				fireTime = 30
-				torso.getWorldDirection()
+				fireTime = 30;
 			}
 			let boxes = []
-			function drawFlames {
-				const gee = new TRHEE.BoxGeometry(0.2, 0.2, 0.2);
-				const maa = new THREE.MeshStandardMaterial({
+			function drawFlames() {
+				const geo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+				const mat = new THREE.MeshStandardMaterial({
 					color: 0xffaa00,
 					roughness: 0.9,
 					metalness: 0.1
 				});
 				const mesh = new THREE.Mesh(geo, mat)
+				mesh.position.copy(torso.position);
+				mesh.userData.velocity = new THREE.Vector3(
+				    (Math.random() - 0.5) * 0.3,  // random left/right
+				    Math.random() * 0.4 + 0.1,    // always goes up
+				    (Math.random() - 0.5) * 0.3   // random forward/back
+				).applyQuaternion(torso.quaternion)
+				.add(vel);
+				mesh.userData.lifetime = 1;
+				boxes.push(mesh);
+				scene.add(mesh)
 			}
 
 
@@ -849,8 +858,24 @@
 				updateChunks();
 
 				timer++;
-
-
+				
+				if (fireTime >= 15) {
+					drawFlames()
+				}
+				for (let i = boxes.length - 1; i >= 0; i--) {
+					const box = boxes[i];
+					box.position.addScaledVector(box.userData.velocity, 1);
+					box.userData.velocity.y -= 0.01;
+					box.userData.lifetime -= 0.01;
+					const t = box.userData.lifetime; 
+					box.scale.setScalar(Math.max(t, 0));
+					if (box.userData.lifetime <= 0) {
+						scene.remove(box);
+						box.geometry.dispose();
+						box.material.dispose();
+						boxes.splice(i, 1); 
+					}
+				}
 				//if (keys['ArrowRight']) angl -= 0.04;
 				//if (keys['ArrowLeft']) angl += 0.04;
 				//if (keys['ArrowUp']) angly = Math.min(angly + 0.04, Math.PI / 2 - 0.02);
@@ -943,11 +968,16 @@
 									vel.addScaledVector(up, 1);
 									vel.addScaledVector(forw, 0.4);
 								}
-							} else {
-								if (fireTime = 0) {
-									fire();
-								}
+							} 
+						}
+						if (fireTime > 0) fireTime--;
+						if (keys['q']) {
+							if (fireTime == 0) {
+								fire();
 							}
+						}
+						if (fireTime > 0 && fireTime % 10 === 0) {
+							drawFlames();
 						}
 						if (keys['m']) {
 							console.log(wing1.rotation.y);
