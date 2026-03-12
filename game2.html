@@ -106,6 +106,30 @@
 					pointer-events: all;
 					">go to peak</button>
 			</div>
+			<div id="controls" style="
+			    position: fixed;
+			    top: 10px;
+			    right: 10px;
+			    background: rgba(255, 255, 255, 0.45);
+			    border: 1px solid #000000;
+			    padding: 8px 12px;
+			    font-family: monospace;
+			    font-size: 13px;
+			    color: #000;
+			    display: inline-flex;
+			    flex-direction: column;
+			    gap: 4px;
+			    pointer-events: none;
+			">
+			    <div><h2><b>tha controls</b></h2></div>
+			    <div>w and s pitch up and downand move</div>
+			    <div>a and d roll and turn</div>
+			    <div>space to go up</div>
+			    <div>j tuck wings to go faster</div>
+			    <div>k to slow down</div>
+			    <div>l is tha fiyahh</div>
+			    <div>p and esc are the different stances</div>
+			</div>
 			<div id="pauseMenu">
 				<h2>Stances</h2>
 			</div>
@@ -968,7 +992,7 @@
 								}
 							} 
 						}
-						if (keys['q']) {
+						if (keys['l']) {
 							if (fireTime == 0) {
 								if (isFlying) fire();
 							}
