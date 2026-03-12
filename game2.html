@@ -848,6 +848,7 @@
 			let pitchAmt = 0
 			const maxLift = 0.006
 			const wingDrag = 0.85
+			let fall = 1;
 			let flapPhase = 0;
 			let flapSpeed = 0.08;
 			let seed = 0
@@ -862,11 +863,11 @@
 
 			let stanceL = ['isRunning', 'isSitting', 'isSleeping', 'isDefensive', 'none']
 			let stance = 'none' // can be sitting, running, walking, sleeping or none.
-			// running would make it faster, and also add a forward backward movement, and also move the tail up and down to account for movement
-			// sitting would prop the drag up so itll be basically sitting with its tail flat with the ground
-			// sleeping would make it curl up and sleep
-			// defensive will make it enter a defensive stance that it can also (hopefully soon) attack other dregs
-			// all of these will only send the wing rot and other stuff to the server
+			// running would make it faster, and also add a forward backward movement, and also move the tail up and down to account for movement || didnt raise tail, but it works to an extent
+			// sitting would prop the drag up so itll be basically sitting with its tail flat with the ground // scrap ig
+			// sleeping would make it curl up and sleep || done
+			// defensive will make it enter a defensive stance that it can also (hopefully soon) attack other dregs || done, no usage yet
+			// all of these will only send the wing rot and other stuff to the server || done
 			let isFlying = true
 			let peakY = -Infinity;
 			let peakX = 0, peakZ = 0;
@@ -1046,7 +1047,13 @@
 						const uprightness = THREE.MathUtils.clamp(dragonUp.dot(up), 0, 1);
 						const lift = uprightness * (1 - wingFactor);
 
-						vel.y -= 0.01 * (1 - lift);
+						if (!isFlying && !onGround) {
+							fallMult = Math.min(fallMult * 1.03, 12); 
+						} else {
+							fallMult = 1; 
+						}
+						
+						vel.y -= 0.01 * (1 - lift) * fallMult;
 						if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.06));
 						vel.multiplyScalar(0.96);
 						let speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
