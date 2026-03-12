@@ -776,7 +776,6 @@
 			window.openStance = openStance;
 			function fire() {
 				fireTime = 30;
-				console.log('recieved');
 			}
 			let boxes = []
 			const fgeo = new THREE.BoxGeometry(1, 1, 1);
@@ -786,20 +785,19 @@
 				metalness: 0.1
 			});
 			function drawFlames() {
-				const mesh = new THREE.Mesh(fgeo, fmat)
+				const mesh = new THREE.Mesh(fgeo, fmat);
 				mesh.position.copy(headpos);
 				mesh.userData.velocity = new THREE.Vector3(
-				    (Math.random() - 0.5) * 8,
-				    Math.random() * 6 + 2,
-				    (Math.random() - 0.5) * 8
+					(Math.random() - 0.5) * 1.5,
+					Math.random() * 1.2 + 0.3,
+					(Math.random() - 0.5) * 1.5
 				).applyQuaternion(torso.quaternion)
-				.add(vel.clone()
-				.multiplyScalar(2))
+				.add(vel.clone().multiplyScalar(0.5));
 				mesh.userData.lifetime = 1;
 				boxes.push(mesh);
-				scene.add(mesh)
-				console.log(mesh)
+				scene.add(mesh);
 			}
+
 
 
 
@@ -860,7 +858,6 @@
 				updateChunks();
 
 				timer++;
-				console.log(fireTime)
 				if (fireTime >= 15) {
 					drawFlames()
 				}
@@ -870,7 +867,7 @@
 					box.userData.velocity.y -= 0.01;
 					box.userData.lifetime -= 0.01;
 					const t = box.userData.lifetime; 
-					box.scale.setScalar(Math.max(t, 0) * 20);
+					box.scale.setScalar(Math.max(t, 0) * 3);
 					if (box.userData.lifetime <= 0) {
 						scene.remove(box);
 						box.geometry.dispose();
@@ -974,9 +971,7 @@
 							} 
 						}
 						if (keys['q']) {
-							console.log('fire?')
 							if (fireTime == 0) {
-								console.log('fire!')
 								fire();
 							}
 						}
