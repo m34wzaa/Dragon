@@ -779,7 +779,7 @@
 				console.log('recieved');
 			}
 			let boxes = []
-			const fgeo = new THREE.BoxGeometry(15, 15, 15);
+			const fgeo = new THREE.BoxGeometry(1, 1, 1);
 			const fmat = new THREE.MeshStandardMaterial({
 				color: 0xffaa00,
 				roughness: 0.9,
@@ -794,7 +794,7 @@
 				    (Math.random() - 0.5) * 8
 				).applyQuaternion(torso.quaternion)
 				.add(vel.clone()
-				.multiplyScalar(50))
+				.multiplyScalar(2))
 				mesh.userData.lifetime = 1;
 				boxes.push(mesh);
 				scene.add(mesh)
