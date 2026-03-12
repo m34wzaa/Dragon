@@ -936,6 +936,20 @@
 							stance = 'none';
 							isFlying = false;
 						}
+						if (isFlying) {
+							head.rotation.x += (0 - head.rotation.x) * 0.20;
+							head.rotation.y += (0 - head.rotation.y) * 0.20;
+							head.rotation.z += (0 - head.rotation.z) * 0.20;
+							tail1.rotation.x += (0 - tail1.rotation.x) * 0.20;
+							tail1.rotation.y += (0 - tail1.rotation.y) * 0.20;
+							tail1.rotation.z += (0 - tail1.rotation.z) * 0.20;
+							tail2.rotation.x += (0 - tail2.rotation.x) * 0.20;
+							tail2.rotation.y += (0 - tail2.rotation.y) * 0.20;
+							tail2.rotation.z += (0 - tail2.rotation.z) * 0.20;
+							wing1.rotation.x += (0 - wing1.rotation.x) * 0.20;
+							wing2.rotation.x += (0 - wing2.rotation.x) * 0.20;
+							stance = 'none'
+						}
 						if (keys['d']) { 
 							if (!isFlying) {
 								if (stance == stanceL[0]) torso.rotateOnAxis(yaxis, -0.02);
