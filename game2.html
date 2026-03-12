@@ -778,30 +778,25 @@
 				fireTime = 30;
 			}
 			let boxes = []
-			const fgeo = new THREE.BoxGeometry(1, 1, 1);
+			const fgeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
 			const fmat = new THREE.MeshStandardMaterial({
 				color: 0xffaa00,
 				roughness: 0.9,
 				metalness: 0.1
 			});
 			function drawFlames() {
-				const mesh = new THREE.Mesh(fgeo, fmat);
-				mesh.position.copy(headpos);
-				mesh.userData.velocity = new THREE.Vector3(
-					(Math.random() - 0.5) * 1.5,
-					Math.random() * 1.2 + 0.3,
-					(Math.random() - 0.5) * 1.5
-				).applyQuaternion(torso.quaternion)
-				.add(vel.clone().multiplyScalar(0.5));
-				mesh.userData.lifetime = 1;
-				boxes.push(mesh);
-				scene.add(mesh);
+			    const mesh = new THREE.Mesh(fgeo, fmat);
+			    mesh.position.copy(headpos);
+			    mesh.userData.velocity = new THREE.Vector3(
+			        (Math.random() - 0.5) * 0.1,
+			        (Math.random() - 0.5) * 0.1,
+			        (Math.random() - 0.5) * 0.1
+			    ).applyQuaternion(torso.quaternion)
+			    .add(forw.clone().multiplyScalar(vel.length() * 1.6 + 2));
+			    mesh.userData.lifetime = 1;
+			    boxes.push(mesh);
+			    scene.add(mesh);
 			}
-
-
-
-
-
 
 			let angl = 0
 			let angly = 0.3
@@ -850,15 +845,12 @@
 			let fireTime = 0;
 
 
-
-
-
 			function anim() {
 				requestAnimationFrame(anim);
 				updateChunks();
 
 				timer++;
-				if (fireTime >= 15) {
+				if (fireTime >= 1) {
 					drawFlames()
 				}
 				for (let i = boxes.length - 1; i >= 0; i--) {
@@ -1060,10 +1052,6 @@
 							}
 						}));
 					}
-
-
-
-
 
 					const camB = new THREE.Vector3(0, 0, 1).applyQuaternion(torso.quaternion);
 					const camU = new THREE.Vector3(0, 1, 0).applyQuaternion(torso.quaternion);
