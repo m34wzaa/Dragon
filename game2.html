@@ -794,9 +794,9 @@
 			    ).applyQuaternion(torso.quaternion)
 			    .add(forw.clone().multiplyScalar(vel.length() * -0.3 + 2));
 			    mesh.userData.lifetime = 1;
-				mesh.rotation.x += Math.random(;
-				mesh.rotation.y += Math.random(;
-				mesh.rotation.z += Math.random(;
+				mesh.rotation.x += Math.random();
+				mesh.rotation.y += Math.random();
+				mesh.rotation.z += Math.random();
 			    boxes.push(mesh);
 			    scene.add(mesh);
 			}
