@@ -714,18 +714,19 @@
 					tail2.rotation.x += (0 - tail2.rotation.x) * 0.1;
 				}
 				if (isFlying) {
-					head.rotation.x += (0 - head.rotation.x) * 0.05;
-					head.rotation.y += (0 - head.rotation.y) * 0.05;
-					head.rotation.z += (0 - head.rotation.z) * 0.05;
-					tail1.rotation.x += (0 - tail1.rotation.x) * 0.05;
-					tail1.rotation.y += (0 - tail1.rotation.y) * 0.05;
-					tail1.rotation.z += (0 - tail1.rotation.z) * 0.05;
-					tail2.rotation.x += (0 - tail2.rotation.x) * 0.05;
-					tail2.rotation.y += (0 - tail2.rotation.y) * 0.05;
-					tail2.rotation.z += (0 - tail2.rotation.z) * 0.05;
-					wing1.rotation.x += (0 - wing1.rotation.x) * 0.05;
-					wing2.rotation.x += (0 - wing2.rotation.x) * 0.05;
-				}
+					head.rotation.x += (0 - head.rotation.x) * 0.20;
+					head.rotation.y += (0 - head.rotation.y) * 0.20;
+					head.rotation.z += (0 - head.rotation.z) * 0.20;
+					tail1.rotation.x += (0 - tail1.rotation.x) * 0.20;
+					tail1.rotation.y += (0 - tail1.rotation.y) * 0.20;
+					tail1.rotation.z += (0 - tail1.rotation.z) * 0.20;
+					tail2.rotation.x += (0 - tail2.rotation.x) * 0.20;
+					tail2.rotation.y += (0 - tail2.rotation.y) * 0.20;
+					tail2.rotation.z += (0 - tail2.rotation.z) * 0.20;
+					wing1.rotation.x += (0 - wing1.rotation.x) * 0.20;
+					wing2.rotation.x += (0 - wing2.rotation.x) * 0.20;
+					stance = 'none'
+			20
 			}
 			document.getElementById('playBtn').addEventListener('click', () => {
 				WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
@@ -811,7 +812,7 @@
 			const surfaceNormal = new THREE.Vector3(0, 1, 0); 
 
 			let stanceL = ['isRunning', 'isSitting', 'isSleeping', 'isDefensive', 'none']
-			let stance = 'none' // can be flying if in air, sitting, running, walking, sleeping or none.
+			let stance = 'none' // can be sitting, running, walking, sleeping or none.
 			// running would make it faster, and also add a forward backward movement, and also move the tail up and down to account for movement
 			// sitting would prop the drag up so itll be basically sitting with its tail flat with the ground
 			// sleeping would make it curl up and sleep
