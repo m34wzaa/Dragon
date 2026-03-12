@@ -726,7 +726,8 @@
 					wing1.rotation.x += (0 - wing1.rotation.x) * 0.20;
 					wing2.rotation.x += (0 - wing2.rotation.x) * 0.20;
 					stance = 'none'
-			20
+					20
+				}
 			}
 			document.getElementById('playBtn').addEventListener('click', () => {
 				WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
@@ -774,6 +775,20 @@
 				});
 			}
 			window.openStance = openStance;
+			function fire() {
+				fireTime = 30
+				torso.getWorldDirection()
+			}
+			let boxes = []
+			function drawFlames {
+				const gee = new TRHEE.BoxGeometry(0.2, 0.2, 0.2);
+				const maa = new THREE.MeshStandardMaterial({
+					color: 0xffaa00,
+					roughness: 0.9,
+					metalness: 0.1
+				});
+				const mesh = new THREE.Mesh(geo, mat)
+			}
 
 
 
@@ -822,7 +837,8 @@
 			let peakY = -Infinity;
 			let peakX = 0, peakZ = 0;
 			let paused = false;
-			const playerData = {}
+			const playerData = {};
+			let fireTime = 0;
 
 
 
@@ -927,7 +943,11 @@
 									vel.addScaledVector(up, 1);
 									vel.addScaledVector(forw, 0.4);
 								}
-							} 
+							} else {
+								if (fireTime = 0) {
+									fire();
+								}
+							}
 						}
 						if (keys['m']) {
 							console.log(wing1.rotation.y);
@@ -968,20 +988,20 @@
 
 						torso.position.add(vel);
 						if (torso.position.y <= groundY) {
-						    torso.position.y = effectiveGroundY
-						    vel.y = 0;
-						    isFlying = false;
-						    if (!(keys['w'] || keys['s'])) {
-						        vel.x *= 0.8;
-						        vel.z *= 0.8;
-						    }
+							torso.position.y = effectiveGroundY
+							vel.y = 0;
+							isFlying = false;
+							if (!(keys['w'] || keys['s'])) {
+								vel.x *= 0.8;
+								vel.z *= 0.8;
+							}
 						}
-						
+
 						// second clamp
 						if (torso.position.y < effectiveGroundY) {
-						    torso.position.y = effectiveGroundY
-						    stance = 'none';
-						    if (!(keys['w'] || keys['s'])) vel.set(vel.x * 0.8, vel.y * 0.8, vel.z * 0.8);
+							torso.position.y = effectiveGroundY
+							stance = 'none';
+							if (!(keys['w'] || keys['s'])) vel.set(vel.x * 0.8, vel.y * 0.8, vel.z * 0.8);
 						}
 						if (onGround) {
 							land(stance);
