@@ -1049,7 +1049,6 @@
 
 						vel.y -= 0.01 * (1 - lift);
 						
-						vel.y -= 0.01 * (1 - lift) * fallMult;
 						if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.06));
 						vel.multiplyScalar(0.96);
 						let speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
