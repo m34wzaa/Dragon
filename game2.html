@@ -778,7 +778,7 @@
 				fireTime = 30;
 			}
 			let boxes = []
-			const fgeo = new THREE.BoxGeometry(1, 1, 1);
+			const fgeo = new THREE.BoxGeometry(15, 15, 15);
 			const fmat = new THREE.MeshStandardMaterial({
 				color: 0xffaa00,
 				roughness: 0.9,
@@ -789,11 +789,12 @@
 				const mesh = new THREE.Mesh(fgeo, fmat)
 				mesh.position.copy(headpos);
 				mesh.userData.velocity = new THREE.Vector3(
-				    (Math.random() - 0.5) * 0.3,  // random left/right
-				    Math.random() * 0.4 + 0.1,    // always goes up
-				    (Math.random() - 0.5) * 0.3   // random forward/back
+				    (Math.random() - 0.5) * 8,
+				    Math.random() * 6 + 2,
+				    (Math.random() - 0.5) * 8
 				).applyQuaternion(torso.quaternion)
-				.add(vel);
+				.add(vel.clone()
+				.multiplyScalar(50))
 				mesh.userData.lifetime = 1;
 				boxes.push(mesh);
 				scene.add(mesh)
@@ -868,7 +869,7 @@
 					box.userData.velocity.y -= 0.01;
 					box.userData.lifetime -= 0.01;
 					const t = box.userData.lifetime; 
-					box.scale.setScalar(Math.max(t, 0));
+					box.scale.setScalar(Math.max(t, 0) * 20);
 					if (box.userData.lifetime <= 0) {
 						scene.remove(box);
 						box.geometry.dispose();
