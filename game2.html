@@ -779,12 +779,12 @@
 			}
 			let boxes = []
 			const fgeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-			const fmat = new THREE.MeshStandardMaterial({
-				color: 0xffaa00,
-				roughness: 0.9,
-				metalness: 0.1
-			});
 			function drawFlames() {
+				const fmat = new THREE.MeshStandardMaterial({
+					color: new THREE.Color(1, Math.random() * 0.6, 0),
+					roughness: 0.9,
+					metalness: 0.1
+				});
 			    const mesh = new THREE.Mesh(fgeo, fmat);
 			    mesh.position.copy(headpos);
 			    mesh.userData.velocity = new THREE.Vector3(
