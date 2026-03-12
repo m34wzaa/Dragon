@@ -1047,11 +1047,7 @@
 						const uprightness = THREE.MathUtils.clamp(dragonUp.dot(up), 0, 1);
 						const lift = uprightness * (1 - wingFactor);
 
-						if (!isFlying && !onGround) {
-							fallMult = Math.min(fallMult * 1.03, 12); 
-						} else {
-							fallMult = 1; 
-						}
+						vel.y -= 0.01 * (1 - lift);
 						
 						vel.y -= 0.01 * (1 - lift) * fallMult;
 						if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.06));
