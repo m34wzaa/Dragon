@@ -991,12 +991,13 @@
 				});
 				const mesh = new THREE.Mesh(fgeo, fmat);
 				mesh.position.copy(headpos);
-				mesh.userData.velocity = new THREE.Vector3(
+				vel3 = new THREE.Vector3(
 					(Math.random() - 0.5) * 0.3,
 					(Math.random() - 0.5) * 0.3,
 					(Math.random() - 0.5) * 0.3
 				).applyQuaternion(torso.quaternion)
 					.add(forw.clone().multiplyScalar(vel.length() * -0.9 + 2));
+				mesh.userData.velocity = vel3;
 				mesh.userData.lifetime = 1;
 				mesh.rotation.x += Math.random();
 				mesh.rotation.y += Math.random();
