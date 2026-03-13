@@ -580,7 +580,7 @@
 				return sprite;
 			}
 
-			function makePlayerMesh(x, y, z, color = '#000000') {
+			function makePlayerMesh(x, y, z, color = '#000000', name = 'derg') {
 				const clone = torso.clone();
 				clone.position.set(x, y, z);
 				clone.quaternion.identity(); // reset rotation so it starts neutral
@@ -596,7 +596,8 @@
 					cWing2: clone.getObjectByName('dreg_wing2'),
 					cTail1: clone.getObjectByName('dreg_tail1'),
 					cTail2: clone.getObjectByName('dreg_tail2'),
-					indicator
+					indicator,
+					nameLabel
 				};
 			}
 			function makeNameLabel(name, color = '#000000') {
@@ -809,7 +810,7 @@
 					stance = 'none'
 				}
 			}
-			let mname = document.geteElementById('nameInput').value.trim() || 'derg'
+			let mname = 'derg'
 			let mcolor = '#000000';
 			document.getElementById('playBtn').addEventListener('click', () => {
 				WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
