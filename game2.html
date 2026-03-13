@@ -807,6 +807,7 @@
 				keys[e.key] = false
 			});
 			window.addEventListener('keydown', (e) => {
+				if (chatOpen) return;
 				if (e.key === 'p' || e.key === 'Escape') {
 					paused = !paused;
 					document.getElementById('pauseMenu').style.display = paused ? 'block' : 'none';
