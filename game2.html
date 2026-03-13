@@ -75,6 +75,71 @@
 				font-family: monospace;
 				pointer-events: all;
 			}
+			#chat {
+			    position: fixed;
+			    bottom: 10px;
+			    left: 10px;
+			    width: 320px;
+			    padding: 6px 12px;
+			    background: rgba(0, 0, 0, 0.5);
+			    border: 1px solid rgba(255, 255, 255, 0.2);
+			    font-family: monospace;
+			    font-size: 13px;
+			    color: #ffffff;
+			    display: flex;
+			    flex-direction: column;
+			    gap: 4px;
+			    z-index: 10;
+			}
+			
+			#chatMessages {
+			    display: flex;
+			    flex-direction: column;
+			    gap: 2px;
+			    max-height: 140px;
+			    overflow-y: auto;
+			    overflow-x: hidden;
+			    scrollbar-width: none; 
+			}
+			
+			#chatMessages::-webkit-scrollbar {
+			    display: none; 
+			}
+			
+			#chatInputRow {
+			    display: flex;
+			    gap: 6px;
+			    margin-top: 4px;
+			}
+			
+			#chatInput {
+				display: none;
+			    flex: 1;
+			    background: transparent;
+			    border: none;
+			    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+			    color: #ffffff;
+			    font-family: monospace;
+			    font-size: 13px;
+			    outline: none;
+			    padding: 2px 0;
+			    pointer-events: all;
+			}
+			
+			#chatInput::placeholder {
+			    color: rgba(255, 255, 255, 0.3);
+			}
+			
+			.chatMsg {
+			    word-break: break-word;
+			    line-height: 1.4;
+			    opacity: 1;
+			    transition: opacity 0.5s;
+			}
+			
+			.chatMsg.fading {
+			    opacity: 0;
+			}
 
 		</style>
 		<link rel="icon" type="image/png" href="icon.png">
@@ -148,6 +213,12 @@
 				<div>k to spread wings to slow down</div>
 				<div>l is tha fiyahh</div>
 				<div>p and esc are the different stances</div>
+			</div>
+			<div id="chat">
+			    <div id="chatMessages"></div>
+			    <div id="chatInputRow">
+			        <input id="chatInput" type="text" placeholder="press t to chat" maxlength="80">
+			    </div>
 			</div>
 			<div id="pauseMenu">
 				<h2>Stances</h2>
@@ -551,6 +622,50 @@
 			const otherPlayers = {};
 			const socket = new WebSocket('wss://dragon-production-988c.up.railway.app');
 
+			let chatOpen = false;
+			const chatInput = document.getElementById('chatInput');
+			window.addEventListener('keydown', (e) => {
+				if (e.key === 't' ^^ !chatOpen) {
+					chatOpen = true;
+					chatInput.style.display = 'block';
+					chatInput.focus();
+					e.preventDefault();
+				}
+				if (e.key === 'Enter' && chatOpen) {
+					const msg = chatInput.value.trim();
+					if (msg && socket.readyState === 1) {
+						socket.send(JSON.stringify ({
+							type: 'chat',
+							name: mname,
+							color: '#ffffff',
+							msg: msg
+						}));
+						chatInput.value = '';
+					}
+					chatOpen = false;
+					chatInput.style.display = 'none';
+					chatInput.blur();
+				}
+				if (e.key === 'Escape' && chatOpen) {
+					chatOpen = false;
+					chatInput.value = '';
+					chatInput.style.display = 'none';
+					chatInput.blur();
+				}
+			});
+			function addChatMessage(name, text, color = '#ffffff') {
+				const box = document.getElementById('chatMessages');
+				const line = document.createElement('div');
+				line.className = 'chatMsg';
+				line.innerHTML = `<span style="color:${color}">${name}</span>: ${text}`;
+				box.appendChild(line);
+				box.scrollTop = box.scrollHeight; 
+				
+				setTimeout(() => {
+					line.classList.add('fading');
+					setTimeout(() => line.remove(), 500);
+				}, 30000); // 30 whopping seconds wow
+			}
 			function makeIndicator(color = '#000000') {
 				const canvas = document.createElement('canvas');
 				canvas.width = 64; canvas.height = 64;
@@ -645,6 +760,7 @@
 				if (msg.type === 'init') {
 					myId = msg.id;
 				}
+				if (msg.type === 'chat') addChatMessage(msg.name, msg.msg, msg.color ?? '#ffffff');
 
 				if (msg.id === myId) return;
 
@@ -678,9 +794,11 @@
 			document.body.appendChild(render.domElement);
 			const keys = {};
 			window.addEventListener('keydown', (e) => {
+				if (chatOpen) return;
 				keys[e.key] = true;
 			});
 			window.addEventListener('keyup', (e) => {
+				if (chatOpen) return;
 				keys[e.key] = false
 			});
 			window.addEventListener('keydown', (e) => {
@@ -1196,13 +1314,13 @@
 				const desiredPixels = 22;
 
 				/*for (const id in otherPlayers) {
-			const p = otherPlayers[id];
-			const d = cam.position.distanceTo(p.indicator.position);
-			p.indicator.scale.setScalar(fovFactor * d * desiredPixels / window.innerHeight);
-			const worldDown = new THREE.Vector3(0, -1, 0);
-			worldDown.transformDirection(cam.matrixWorldInverse);
-			p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
-			}*/
+					const p = otherPlayers[id];
+					const d = cam.position.distanceTo(p.indicator.position);
+					p.indicator.scale.setScalar(fovFactor * d * desiredPixels / window.innerHeight);
+					const worldDown = new THREE.Vector3(0, -1, 0);
+					worldDown.transformDirection(cam.matrixWorldInverse);
+					p.indicator.material.rotation = Math.atan2(worldDown.x, worldDown.y);
+				}*/
 				for (const id of Object.keys(otherPlayers)) {
 					if (!playerData[id]) removePlayer(id);
 				}
