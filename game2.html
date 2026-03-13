@@ -781,6 +781,9 @@
 										 };
 				}
 				if (msg.type === 'leave') {
+					const leavingName = playerData[msg.id]?.name ?? 'derg';
+					console.log(leavingName + ' has left!');
+					addChatMessage('server', leavingName + ' has left!', '#888888');
 					delete playerData[msg.id];
 					removePlayer(msg.id);
 				}
@@ -1340,6 +1343,7 @@
 					if (!p_exists) {
 						otherPlayers[id] = makePlayerMesh(0, 0, 0, d.color ?? '#000000', d.name ?? 'derg');
 						console.log(d.name, ' has joined!')
+						addChatMessage('server', d.name + ' has joined!', '#888888');
 					}
 
 					const p = otherPlayers[id];  
