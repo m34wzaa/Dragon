@@ -625,7 +625,7 @@
 			let chatOpen = false;
 			const chatInput = document.getElementById('chatInput');
 			window.addEventListener('keydown', (e) => {
-				if (e.key === 't' ^^ !chatOpen) {
+				if (e.key === 't' && !chatOpen) {
 					chatOpen = true;
 					chatInput.style.display = 'block';
 					chatInput.focus();
