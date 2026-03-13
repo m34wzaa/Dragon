@@ -655,6 +655,9 @@
 			});
 			function addChatMessage(name, text, color = '#ffffff') {
 				const box = document.getElementById('chatMessages');
+				if (box.children.length >= 8) {
+    				box.removeChild(box.firstChild);
+  			  	}
 				const line = document.createElement('div');
 				line.className = 'chatMsg';
 				line.innerHTML = `<span style="color:${color}">${name}</span>: ${text}`;
