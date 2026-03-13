@@ -84,7 +84,26 @@
 			<h2>gaem</h2>
 			<label>seed</label>
 			<input id="seedInput" type="number" value="1" min="1">
-			<button id="playBtn">join</button>
+			<label>username</label>
+			<input id="nameInput" type="text" placeholder="derg" maxlength="16" style="
+				padding: 6px 12px;
+				font-size: 18px;
+				background: #111;
+				color: #ffffff;
+				border: 1px solid #ffffff;
+				outline: none;
+				text-align: center;
+				width: 120px;
+				">
+			<label>indicator colour:</label>
+			<input id="colorInput" type="color" value="#000000" style="
+				width: 60px; height: 36px;
+				border: 1px solid #fff;
+				background: #111;
+				cursor: pointer;
+				padding: 2px;
+				">
+			<button id="playBtn"><h2>join</button>
 		</div>
 		<div id="hud">
 			<div id="box">
@@ -196,24 +215,24 @@
 					exponent: { value: 0.6 }
 				},
 				vertexShader: `
-			varying vec3 vWorldPosition;
-			void main() {
-			vec4 worldPos = modelMatrix * vec4(position, 1.0);
-			vWorldPosition = worldPos.xyz;
-			gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-			}
-			`,
+					varying vec3 vWorldPosition;
+					void main() {
+					vec4 worldPos = modelMatrix * vec4(position, 1.0);
+					vWorldPosition = worldPos.xyz;
+					gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+					}
+					`,
 				fragmentShader: `
-			uniform vec3 topColor;
-			uniform vec3 bottomColor;
-			uniform float offset;
-			uniform float exponent;
-			varying vec3 vWorldPosition;
-			void main() {
-			float h = normalize(vWorldPosition).y + offset;
-			gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
-			}
-			`,
+					uniform vec3 topColor;
+					uniform vec3 bottomColor;
+					uniform float offset;
+					uniform float exponent;
+					varying vec3 vWorldPosition;
+					void main() {
+					float h = normalize(vWorldPosition).y + offset;
+					gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(h, exponent), 0.0)), 1.0);
+					}
+					`,
 				side: THREE.BackSide // render inside of sphere
 			});
 			const sky = new THREE.Mesh(skyGeo, skyMat);
@@ -533,14 +552,14 @@
 			const otherPlayers = {};
 			const socket = new WebSocket('wss://dragon-production-988c.up.railway.app');
 
-			function makeIndicator() {
+			function makeIndicator(color = '#000000') {
 				const canvas = document.createElement('canvas');
 				canvas.width = 64; canvas.height = 64;
 				const ctx = canvas.getContext('2d');
 
 				// Downward-pointing arrow
-				ctx.fillStyle = '#00eeff';
-				ctx.shadowColor = '#00eeff';
+				ctx.fillStyle = color;
+				ctx.shadowColor = color;
 				ctx.shadowBlur = 10;
 				ctx.beginPath();
 				ctx.moveTo(32, 54);   // tip
@@ -561,13 +580,15 @@
 				return sprite;
 			}
 
-			function makePlayerMesh(x, y, z) {
+			function makePlayerMesh(x, y, z, color = '#000000') {
 				const clone = torso.clone();
 				clone.position.set(x, y, z);
 				clone.quaternion.identity(); // reset rotation so it starts neutral
 				scene.add(clone);
-				const indicator = makeIndicator();
+				const indicator = makeIndicator(color);
 				indicator.position.set(x, y + 2, z);
+				const nameLabel = makeNameLabel(name, color);
+				nameLabel.position.set(x, y + 5, z)
 				return {
 					mesh:   clone,
 					cHead:  clone.getObjectByName('dreg_head'),
@@ -578,12 +599,40 @@
 					indicator
 				};
 			}
+			function makeNameLabel(name, color = '#000000') {
+		    const canvas = document.createElement('canvas');
+		    canvas.width = 256; canvas.height = 64;
+		    const ctx = canvas.getContext('2d');
+		
+		    ctx.font = 'bold 28px monospace';
+		    ctx.textAlign = 'center';
+		    ctx.textBaseline = 'middle';
+		    ctx.shadowColor = color;
+		    ctx.shadowBlur = 10;
+		    ctx.fillStyle = color;
+		    ctx.fillText(name, 128, 32);
+		
+		    const texture = new THREE.CanvasTexture(canvas);
+		    const mat = new THREE.SpriteMaterial({
+		        map: texture,
+		        depthTest: false,
+		        transparent: true
+		    });
+		    const sprite = new THREE.Sprite(mat);
+		    sprite.scale.set(20, 5, 1);
+		    scene.add(sprite);
+		    return sprite;
+		}
+
 
 			function removePlayer(id) {
 				const p = otherPlayers[id];
 				if (!p) return;
 				scene.remove(p.mesh);
 				scene.remove(p.indicator);
+				scene.remove(p.nameLabel);
+		    p.nameLabel.material.map.dispose();
+		    p.nameLabel.material.dispose();
 				p.indicator.material.map.dispose();
 				p.indicator.material.dispose();
 				delete otherPlayers[id];
@@ -604,7 +653,12 @@
 						removePlayer(msg.id);
 						return;
 					}
-					playerData[msg.id] = { pos: msg.pos, quat: msg.quat, parts: msg.parts };
+					playerData[msg.id] = { pos: msg.pos, 
+										  quat: msg.quat, 
+										  parts: msg.parts,
+										  name: msg.name ?? 'dragon' ,
+										  color: msg.color ? '#000000'
+											  };
 				}
 				if (msg.type === 'leave') {
 					delete playerData[msg.id];
@@ -755,8 +809,12 @@
 					stance = 'none'
 				}
 			}
+			let mname = document.geteElementById('nameInput').value.trim() || 'derg'
+			let mcolor = '#000000';
 			document.getElementById('playBtn').addEventListener('click', () => {
 				WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
+				mcolor = document.getElementById('colorInput').value;
+				mname = document.getElementById('nameInput').value.trim() || 'derg'
 				perlin2 = createNoise(WORLD_SEED);
 				document.getElementById('startScreen').style.display = 'none';
 				document.getElementById('seedDisplay').textContent = 'Seed: ' + WORLD_SEED;
@@ -769,15 +827,15 @@
 			function openStance() {
 				const menu = document.getElementById('pauseMenu');
 				menu.innerHTML = `
-			<b style="font-size:16px; margin-bottom:8px;">— stances —</b>
-			<p style="font-size:11px; margin-bottom:12px; opacity:0.6;">only active on ground</p>
-			<div id="stanceGrid" style="
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 8px;
-			width: 260px;
-			"></div>
-			`;
+					<b style="font-size:16px; margin-bottom:8px;">— stances —</b>
+					<p style="font-size:11px; margin-bottom:12px; opacity:0.6;">only active on ground</p>
+					<div id="stanceGrid" style="
+					display: grid;
+					grid-template-columns: 1fr 1fr;
+					gap: 8px;
+					width: 260px;
+					"></div>
+					`;
 
 				const grid = document.getElementById('stanceGrid');
 
@@ -1017,8 +1075,8 @@
 						}
 						if (fireTime > 0) fireTime--;
 						/*if (fireTime > 0 && fireTime % 10 === 0) {
-			drawFlames();
-			}*/
+							drawFlames();
+						}*/
 						if (keys['m']) {
 							console.log(wing1.rotation.y);
 							console.log(wing2.rotation.y);
@@ -1048,7 +1106,7 @@
 						const lift = uprightness * (1 - wingFactor);
 
 						vel.y -= 0.01 * (1 - lift);
-						
+
 						if (isFlying) vel.addScaledVector(forw, 0.02 + (plus * 0.06));
 						vel.multiplyScalar(0.96);
 						let speedCap = THREE.MathUtils.lerp(3.0, 0.5, wingFactor);
@@ -1088,6 +1146,8 @@
 						socket.send(JSON.stringify({
 							type: 'move',
 							worldSeed: WORLD_SEED,
+							color: mcolor,
+							name: mname,
 							pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
 							quat: { x: q.x, y: q.y, z: q.z, w: q.w },
 							vel:  { x: vel.x, y: vel.y, z: vel.z },
@@ -1148,7 +1208,7 @@
 				for (const id in playerData) {
 					if (!torso || !gameStarted) break;
 					if (!otherPlayers[id]) {
-						otherPlayers[id] = makePlayerMesh(0, 0, 0);
+						otherPlayers[id] = makePlayerMesh(0, 0, 0, d.color ?? '#000000', d.name ?? 'derg');
 						const p = otherPlayers[id];
 						console.log('parts found:', p.cHead, p.cWing1, p.cWing2, p.cTail1, p.cTail2);
 					}
@@ -1158,7 +1218,14 @@
 					p.mesh.position.set(d.pos.x, d.pos.y, d.pos.z);
 					p.mesh.quaternion.set(d.quat.x, d.quat.y, d.quat.z, d.quat.w);
 					p.indicator.position.set(d.pos.x, d.pos.y + 2, d.pos.z);
+					p.nameLabel.position.set(d.pos.x, d.pos.y + 5, d.pos.z)
 
+					const dist = cam.position.distanceTo(p.nameLabel.position);
+					p.nameLabel.scale.set(
+					    fovFactor * dist * 80 / window.innerHeight,
+					    fovFactor * dist * 20 / window.innerHeight,
+					    1
+					);
 					if (d.parts) {
 						const t = d.parts;
 						if (p.cHead)  p.cHead.rotation.set(t.head.rx,   t.head.ry,   t.head.rz);
