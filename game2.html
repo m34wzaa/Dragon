@@ -991,7 +991,7 @@
 				});
 				const mesh = new THREE.Mesh(fgeo, fmat);
 				mesh.position.copy(headpos);
-				vel3 = new THREE.Vector3(
+				const vel3 = new THREE.Vector3(
 					(Math.random() - 0.5) * 0.3,
 					(Math.random() - 0.5) * 0.3,
 					(Math.random() - 0.5) * 0.3
