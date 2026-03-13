@@ -28,6 +28,15 @@ wss.on('connection', (ws) => {
                 }
             });
         }
+
+        if (msg.type === 'chat') {
+        wss.clients.forEach((client) => {
+            if (client !== ws && client.readyState === 1) {
+                client.send(JSON.stringify({ ...msg, id }));
+            }
+        });
+    }
+        
     });
 
     ws.on('close', () => {
