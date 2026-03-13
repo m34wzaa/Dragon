@@ -1003,6 +1003,13 @@
 				mesh.rotation.z += Math.random();
 				boxes.push(mesh);
 				scene.add(mesh);
+				if (socket.readyState === 1) {
+			        socket.send(JSON.stringify({
+			            type: 'fire',
+			            pos: { x: headpos.x, y: headpos.y, z: headpos.z },
+			            vel: { x: vel3.x, y: vel3.y, z: vel3.z }
+			        }));
+			    }
 			}
 
 			let angl = 0
