@@ -978,6 +978,14 @@
 					btn.addEventListener('click', () => {
 						stance = name;
 						openStance();
+						if (socket.readyState === 1) {
+					        socket.send(JSON.stringify({
+					            type: 'chat',
+					            name: 'server',
+					            color: '#aaaaaa',
+					            msg: mname + ' is ' + name.replace('is', '').toLowerCase() + '.'
+					        }));
+					    }
 					});
 					grid.appendChild(btn);
 				});
