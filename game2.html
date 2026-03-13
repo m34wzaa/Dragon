@@ -513,7 +513,6 @@
 
 			const he = 1.222222
 			const w = 2.3 
-			const d = 0
 			const tex = new THREE.TextureLoader();
 			function texx(path) {
 				const t = tex.load(path, (texObj) => {
@@ -1208,14 +1207,17 @@
 				}
 				for (const id in playerData) {
 					if (!torso || !gameStarted) break;
-					if (!otherPlayers[id]) {
+				
+					const d = playerData[id];   
+					const p_exists = otherPlayers[id];
+				
+					if (!p_exists) {
 						otherPlayers[id] = makePlayerMesh(0, 0, 0, d.color ?? '#000000', d.name ?? 'derg');
-						const p = otherPlayers[id];
-						console.log('parts found:', p.cHead, p.cWing1, p.cWing2, p.cTail1, p.cTail2);
+						console.log('parts found:', otherPlayers[id].cHead);
 					}
-					const p = otherPlayers[id];
-					const d = playerData[id];
-
+				
+					const p = otherPlayers[id];  
+				
 					p.mesh.position.set(d.pos.x, d.pos.y, d.pos.z);
 					p.mesh.quaternion.set(d.quat.x, d.quat.y, d.quat.z, d.quat.w);
 					p.indicator.position.set(d.pos.x, d.pos.y + 2, d.pos.z);
