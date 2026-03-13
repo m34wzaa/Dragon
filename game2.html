@@ -983,7 +983,7 @@
 								const stanceName = name === 'none' ? 'walking' : name.replace('is', '').toLowerCase();
 						        socket.send(JSON.stringify({
 						            type: 'chat',
-						            name: 'server',
+						            name: 'server:',
 						            color: '#aaaaaa',
 						            msg: mname + ' is ' + stanceName + '.'
 						        }));
