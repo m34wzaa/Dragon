@@ -564,6 +564,7 @@
 				ctx.moveTo(32, 54);   // tip
 				ctx.lineTo(10, 14);   // top-left
 				ctx.lineTo(54, 14);   // top-right
+				//makes a regular triangle not other kind such as isosoles or whatever
 				ctx.closePath();
 				ctx.fill();
 
@@ -582,7 +583,7 @@
 			function makePlayerMesh(x, y, z, color = '#000000', name = 'derg') {
 				const clone = torso.clone();
 				clone.position.set(x, y, z);
-				clone.quaternion.identity(); // reset rotation so it starts neutral
+				clone.quaternion.identity();
 				scene.add(clone);
 				const indicator = makeIndicator(color);
 				indicator.position.set(x, y + 2, z);
@@ -600,29 +601,29 @@
 				};
 			}
 			function makeNameLabel(name, color = '#000000') {
-		    const canvas = document.createElement('canvas');
-		    canvas.width = 256; canvas.height = 64;
-		    const ctx = canvas.getContext('2d');
-		
-		    ctx.font = 'bold 28px monospace';
-		    ctx.textAlign = 'center';
-		    ctx.textBaseline = 'middle';
-		    ctx.shadowColor = color;
-		    ctx.shadowBlur = 10;
-		    ctx.fillStyle = color;
-		    ctx.fillText(name, 128, 32);
-		
-		    const texture = new THREE.CanvasTexture(canvas);
-		    const mat = new THREE.SpriteMaterial({
-		        map: texture,
-		        depthTest: false,
-		        transparent: true
-		    });
-		    const sprite = new THREE.Sprite(mat);
-		    sprite.scale.set(20, 5, 1);
-		    scene.add(sprite);
-		    return sprite;
-		}
+				const canvas = document.createElement('canvas');
+				canvas.width = 256; canvas.height = 64;
+				const ctx = canvas.getContext('2d');
+
+				ctx.font = 'bold 28px monospace';
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.shadowColor = '#00ffff';
+				ctx.shadowBlur = 10;
+				ctx.fillStyle = '#00ffff';
+				ctx.fillText(name, 128, 32);
+
+				const texture = new THREE.CanvasTexture(canvas);
+				const mat = new THREE.SpriteMaterial({
+					map: texture,
+					depthTest: false,
+					transparent: true
+				});
+				const sprite = new THREE.Sprite(mat);
+				sprite.scale.set(20, 5, 1);
+				scene.add(sprite);
+				return sprite;
+			}
 
 
 			function removePlayer(id) {
@@ -631,8 +632,8 @@
 				scene.remove(p.mesh);
 				scene.remove(p.indicator);
 				scene.remove(p.nameLabel);
-		    p.nameLabel.material.map.dispose();
-		    p.nameLabel.material.dispose();
+				p.nameLabel.material.map.dispose();
+				p.nameLabel.material.dispose();
 				p.indicator.material.map.dispose();
 				p.indicator.material.dispose();
 				delete otherPlayers[id];
@@ -658,7 +659,7 @@
 										  parts: msg.parts,
 										  name: msg.name ?? 'dragon' ,
 										  color: msg.color ?? '#000000'
-											  };
+										 };
 				}
 				if (msg.type === 'leave') {
 					delete playerData[msg.id];
@@ -1041,7 +1042,7 @@
 								pitching = -1; 
 							} else {
 								if (stance == stanceL[0]) vel.addScaledVector(forw, -0.02);
-								if (stance == stanceL[1]) vel.addScaledVector(forw, 0.00); // only 0.00 cos im too lazy to change
+								if (stance == stanceL[1]) vel.addScaledVector(forw, 0.00); // still 0.00 cos im too lazy to change
 								if (stance == stanceL[2]) vel.addScaledVector(forw, 0.00);
 								if (stance == stanceL[3]) vel.addScaledVector(forw, -0.002);
 								if (stance == stanceL[4]) vel.addScaledVector(forw, -0.01);
@@ -1207,28 +1208,25 @@
 				}
 				for (const id in playerData) {
 					if (!torso || !gameStarted) break;
-				
+
 					const d = playerData[id];   
 					const p_exists = otherPlayers[id];
-				
+
 					if (!p_exists) {
 						otherPlayers[id] = makePlayerMesh(0, 0, 0, d.color ?? '#000000', d.name ?? 'derg');
 						console.log('parts found:', otherPlayers[id].cHead);
 					}
-				
+
 					const p = otherPlayers[id];  
-				
+
 					p.mesh.position.set(d.pos.x, d.pos.y, d.pos.z);
 					p.mesh.quaternion.set(d.quat.x, d.quat.y, d.quat.z, d.quat.w);
 					p.indicator.position.set(d.pos.x, d.pos.y + 2, d.pos.z);
 					p.nameLabel.position.set(d.pos.x, d.pos.y + 5, d.pos.z)
 
-					const dist = cam.position.distanceTo(p.nameLabel.position);
-					p.nameLabel.scale.set(
-					    fovFactor * dist * 80 / window.innerHeight,
-					    fovFactor * dist * 20 / window.innerHeight,
-					    1
-					);
+					const labelDist = cam.position.distanceTo(p.nameLabel.position);
+					const labelSize = labelDist * fovFactor * 0.05;
+					p.nameLabel.scale.set(labelSize * 4, labelSize, 1);
 					if (d.parts) {
 						const t = d.parts;
 						if (p.cHead)  p.cHead.rotation.set(t.head.rx,   t.head.ry,   t.head.rz);
