@@ -979,11 +979,12 @@
 						stance = name;
 						openStance();
 						if (socket.readyState === 1) {
+							const stanceName = name === 'none' ? 'walking' : name.replace('is', '').toLowerCase();
 					        socket.send(JSON.stringify({
 					            type: 'chat',
 					            name: 'server',
 					            color: '#aaaaaa',
-					            msg: mname + ' is ' + name.replace('is', '').toLowerCase() + '.'
+					            msg: mname + ' is ' + stanceName + '.'
 					        }));
 					    }
 					});
