@@ -1089,6 +1089,11 @@
 						boxes.splice(i, 1); 
 					}
 				}
+
+			if (!gameStarted) {
+				render.render(scene, cam);
+				return;
+			}
 				//if (keys['ArrowRight']) angl -= 0.04;
 				//if (keys['ArrowLeft']) angl += 0.04;
 				//if (keys['ArrowUp']) angly = Math.min(angly + 0.04, Math.PI / 2 - 0.02);
