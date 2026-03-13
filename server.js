@@ -36,6 +36,15 @@ wss.on('connection', (ws) => {
             }
         });
     }
+
+    if (msg.type === 'fire') {
+        wss.clients.forEach((client) => {
+            if (client !== ws && client.readyState === 1) {
+                client.send(JSON.stringify({ ...msg, id }));
+            }
+        });
+    }
+
         
     });
 
