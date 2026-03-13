@@ -663,7 +663,7 @@
 				line.innerHTML = `<span style="color:${color}">${name}</span>: ${text}`;
 				box.appendChild(line);
 				box.scrollTop = box.scrollHeight; 
-				
+				console.log(name, text)
 				setTimeout(() => {
 					line.classList.add('fading');
 					setTimeout(() => line.remove(), 500);
