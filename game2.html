@@ -429,11 +429,17 @@
 
 				for (let i = 0; i < pos.count; i++) {
 					const ny = normals.getY(i);
-
-					const c = THREE.MathUtils.clamp((ny - 0.5) / 0.5, 0.15, 1.0);;
-					colors[i * 3]     = c;  // R
-					colors[i * 3 + 1] = c;  // G
-					colors[i * 3 + 2] = c;  // B
+					const yy = pos.getY(i);
+					const c = THREE.MathUtils.clamp((ny - 0.5) / 0.5, 0.15, 1.0);
+					const gren = THREE.MathUtils.clamp(1 - yy / 20, 0, 1);
+					let r = c, g = c, b = c
+					r = r * (1 - gren) + 0.2 * gren;
+					g = g * (1 - gren) + 0.6 * gren;
+					b = b * (1 - gren) + 0.1 * gren;
+					
+					colors[i * 3]     = r;  // R
+					colors[i * 3 + 1] = g;  // G
+					colors[i * 3 + 2] = b;  // B
 				}
 				geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
