@@ -394,7 +394,7 @@
 			});
 
 			const chunkDecorations = {};
-			const grassPerChunk = 220;
+			const grassPerChunk = 600;
 			const treeAttemptsPerChunk = 18;
 			const bushAttemptsPerChunk = 14;
 			const rockAttemptsPerChunk = 20;
@@ -403,8 +403,8 @@
 			const bushMaxHeight = 48;
 			const rockMinHeight = 120;
 
-			const grassPlane = new THREE.PlaneGeometry(0.9, 3.2, 1, 4);
-			grassPlane.translate(0, 1.6, 0);
+			const grassPlane = new THREE.PlaneGeometry(0.35, 0.45, 1, 2);
+			grassPlane.translate(0, 0.225, 0);
 
 			const grassMaterial = new THREE.ShaderMaterial({
 				uniforms: {
@@ -419,8 +419,8 @@
 						vec3 p = position;
 						vec4 worldBase = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
 						float phase = time * 1.7 + worldBase.x * 0.08 + worldBase.z * 0.06;
-						float bend = sin(phase) * 0.22 * uv.y;
-						float bend2 = cos(phase * 0.7) * 0.12 * uv.y;
+						float bend = sin(phase) * 0.09 * uv.y;
+						float bend2 = cos(phase * 0.7) * 0.05 * uv.y;
 						p.x += bend;
 						p.z += bend2;
 						vShade = 0.45 + uv.y * 0.55;
@@ -555,10 +555,10 @@
 					if (h > grassMaxHeight) continue;
 					const nrm = normalAt(wx, wz);
 					if (nrm.y < 0.82) continue;
-					dummy.position.set(wx, h + 0.03, wz);
+					dummy.position.set(wx, h + 0.01, wz);
 					dummy.rotation.set(0, rand() * Math.PI * 2, 0);
-					const s = 0.7 + rand() * 0.8;
-					dummy.scale.set(0.7 * s, 0.8 + s, 0.7 * s);
+					const s = 0.6 + rand() * 0.6;
+					dummy.scale.set(s, s, s);
 					dummy.updateMatrix();
 					grass.setMatrixAt(grassCount++, dummy.matrix);
 				}
@@ -580,8 +580,6 @@
 					const treeRand = mulberry32(hash2(Math.floor(wx), Math.floor(wz), 7));
 					const tree = makeTree(treeRand);
 					tree.position.set(wx, h, wz);
-					tree.rotation.y = rand() * Math.PI * 2;
-					tree.scale.multiplyScalar(0.8 + rand() * 1.2);
 					scene.add(tree);
 					meshes.push(tree);
 				}
@@ -748,8 +746,8 @@
 			}
 
 			let peakSearchRadius = 0;
-			const PEAK_SEARCH_STEP = 100;
-			const PEAK_SEARCH_RING = 1200;
+			const peakSearchStep = 100;
+			const peakSearchRing = 1200;
 			let maxx = 0;
 			async function findPeak() {
 				document.getElementById('peakDisplay').textContent = `Peak: searching...`;
@@ -1215,27 +1213,27 @@
 					const btn = document.createElement('button');
 					btn.textContent = name.replace('is', '').toLowerCase();
 					btn.style.cssText = `
-		padding: 10px 0;
-		background: ${stance === name ? '#ffffff' : 'transparent'};
-		color: ${stance === name ? '#000' : '#fff'};
-		border: 1px solid #ffffff;
-		cursor: pointer;
-		font-family: monospace;
-		font-size: 13px;
-		`;
+	padding: 10px 0;
+	background: ${stance === name ? '#ffffff' : 'transparent'};
+	color: ${stance === name ? '#000' : '#fff'};
+	border: 1px solid #ffffff;
+	cursor: pointer;
+	font-family: monospace;
+	font-size: 13px;
+	`;
 					btn.addEventListener('click', () => {
 						if (name !== stance) {
 							stance = name;
 							openStance();
 							if (socket.readyState === 1) {
 								const stanceName = name === 'none' ? 'walking' : name.replace('is', '').toLowerCase();
-						        socket.send(JSON.stringify({
-						            type: 'chat',
-						            name: 'server:',
-						            color: '#aaaaaa',
-						            msg: mname + ' is ' + stanceName + '.'
-						        }));
-						    }
+							        socket.send(JSON.stringify({
+							            type: 'chat',
+							            name: 'server:',
+							            color: '#aaaaaa',
+							            msg: mname + ' is ' + stanceName + '.'
+							        }));
+							    }
 						}
 					});
 					grid.appendChild(btn);
