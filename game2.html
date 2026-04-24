@@ -1382,6 +1382,7 @@ font-size: 13px;
 							wing2.rotation.x += (0 - wing2.rotation.x) * 0.20;
 							stance = 'none'
 						}
+						torso.getWorldDirection(forw);
 						if (keys['d']) { 
 							if (!isFlying) {
 								if (stance == stanceL[0]) torso.rotateOnAxis(yaxis, -0.02);
@@ -1463,7 +1464,6 @@ font-size: 13px;
 							if (plus > -0.01 && plus < 0.01) plus = 0;
 						}
 						torso.getWorldDirection(forw);
-
 						const wingFactor = THREE.MathUtils.clamp(
 							(wing2.rotation.y - minrot) / (maxrot - minrot), 0, 1
 						);
@@ -1527,7 +1527,7 @@ font-size: 13px;
 					const camB = new THREE.Vector3(0, 0, 1).applyQuaternion(torso.quaternion);
 					const camU = new THREE.Vector3(0, 1, 0).applyQuaternion(torso.quaternion);
 					const camt = headpos.clone()
-						.addScaledVector(camB, 7)
+						.addScaledVector(camB, -7)
 						.addScaledVector(camU, 3);
 					cam.position.lerp(camt, 0.1);
 					cam.up.lerp(camU, 0.1).normalize();
