@@ -366,31 +366,45 @@
 
 			});
 
-			let worldSeed = 1;
+			/*loader.load('tex/scene.gltf', (gltf) => {
+			const enviro = gltf.scene;
+
+			const box = new THREE.Box3().setFromObject(enviro);
+			const center = new THREE.Vector3();
+			box.getCenter(center);
+			enviro.position.sub(center);
+
+			enviro.scale.setScalar(500);
+			enviro.position.set(0, 0, 0);
+			scene.add(enviro);
+			enviro.traverse((child) => {
+			if (child.isMesh) groundMeshes.push(child);
+			});
+			});*/
+			let WORLD_SEED = 1;
 			let perlin2 = null;
 			let gameStarted = false;
-			const chunkSize = 100;
-			const chunkSegs = 50;
-			let viewDist  = 8; 
+			const CHUNK_SIZE = 100;
+			const CHUNK_SEGS = 50;
+			let VIEW_DIST  = 8; 
 			const chunks = {};
 			const slider = document.getElementById("renderDist")
 			slider.addEventListener('input', () => {
-				viewDist = Number(slider.value);
+				VIEW_DIST = Number(slider.value);
 			});
 
 			const chunkDecorations = {};
-			const grassPerChunk = 600;
-			const treeAttemptsPerChunk = 0;
-			const bushAttemptsPerChunk = 0;
-			const rockAttemptsPerChunk = 0;
+			const grassPerChunk = 220;
+			const treeAttemptsPerChunk = 18;
+			const bushAttemptsPerChunk = 14;
+			const rockAttemptsPerChunk = 20;
 			const grassMaxHeight = 42;
 			const treeMaxHeight = 58;
 			const bushMaxHeight = 48;
 			const rockMinHeight = 120;
-			const grassRadius = 1;
 
-			const grassPlane = new THREE.PlaneGeometry(0.35, 0.45, 1, 2);
-			grassPlane.translate(0, 0.225, 0);
+			const grassPlane = new THREE.PlaneGeometry(0.9, 3.2, 1, 4);
+			grassPlane.translate(0, 1.6, 0);
 
 			const grassMaterial = new THREE.ShaderMaterial({
 				uniforms: {
@@ -405,8 +419,8 @@
 						vec3 p = position;
 						vec4 worldBase = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
 						float phase = time * 1.7 + worldBase.x * 0.08 + worldBase.z * 0.06;
-						float bend = sin(phase) * 0.09 * uv.y;
-						float bend2 = cos(phase * 0.7) * 0.05 * uv.y;
+						float bend = sin(phase) * 0.22 * uv.y;
+						float bend2 = cos(phase * 0.7) * 0.12 * uv.y;
 						p.x += bend;
 						p.z += bend2;
 						vShade = 0.45 + uv.y * 0.55;
@@ -442,7 +456,7 @@
 			}
 
 			function hash2(a, b, c = 0) {
-				let h = (a * 374761393 + b * 668265263 + c * 1442695040888963407) ^ worldSeed;
+				let h = (a * 374761393 + b * 668265263 + c * 1442695040888963407) ^ WORLD_SEED;
 				h = Math.imul(h ^ (h >>> 13), 1274126177);
 				return (h ^ (h >>> 16)) >>> 0;
 			}
@@ -535,31 +549,30 @@
 				let grassCount = 0;
 
 				for (let i = 0; i < grassPerChunk; i++) {
-					const wx = cx * chunkSize + (rand() - 0.5) * chunkSize;
-					const wz = cz * chunkSize + (rand() - 0.5) * chunkSize;
+					const wx = cx * CHUNK_SIZE + (rand() - 0.5) * CHUNK_SIZE;
+					const wz = cz * CHUNK_SIZE + (rand() - 0.5) * CHUNK_SIZE;
 					const h = heightAt(wx, wz);
 					if (h > grassMaxHeight) continue;
 					const nrm = normalAt(wx, wz);
 					if (nrm.y < 0.82) continue;
-					dummy.position.set(wx, h + 0.01, wz);
+					dummy.position.set(wx, h + 0.03, wz);
 					dummy.rotation.set(0, rand() * Math.PI * 2, 0);
-					const s = 0.6 + rand() * 0.6;
-					dummy.scale.set(s, s, s);
+					const s = 0.7 + rand() * 0.8;
+					dummy.scale.set(0.7 * s, 0.8 + s, 0.7 * s);
 					dummy.updateMatrix();
 					grass.setMatrixAt(grassCount++, dummy.matrix);
 				}
 
 				grass.count = grassCount;
 				grass.instanceMatrix.needsUpdate = true;
-				grass.visible = false;
 				if (grassCount > 0) {
 					scene.add(grass);
 					meshes.push(grass);
 				}
 
 				for (let i = 0; i < treeAttemptsPerChunk; i++) {
-					const wx = cx * chunkSize + (rand() - 0.5) * chunkSize;
-					const wz = cz * chunkSize + (rand() - 0.5) * chunkSize;
+					const wx = cx * CHUNK_SIZE + (rand() - 0.5) * CHUNK_SIZE;
+					const wz = cz * CHUNK_SIZE + (rand() - 0.5) * CHUNK_SIZE;
 					const h = heightAt(wx, wz);
 					const nrm = normalAt(wx, wz);
 					if (h > treeMaxHeight || nrm.y < 0.9) continue;
@@ -567,13 +580,15 @@
 					const treeRand = mulberry32(hash2(Math.floor(wx), Math.floor(wz), 7));
 					const tree = makeTree(treeRand);
 					tree.position.set(wx, h, wz);
+					tree.rotation.y = rand() * Math.PI * 2;
+					tree.scale.multiplyScalar(0.8 + rand() * 1.2);
 					scene.add(tree);
 					meshes.push(tree);
 				}
 
 				for (let i = 0; i < bushAttemptsPerChunk; i++) {
-					const wx = cx * chunkSize + (rand() - 0.5) * chunkSize;
-					const wz = cz * chunkSize + (rand() - 0.5) * chunkSize;
+					const wx = cx * CHUNK_SIZE + (rand() - 0.5) * CHUNK_SIZE;
+					const wz = cz * CHUNK_SIZE + (rand() - 0.5) * CHUNK_SIZE;
 					const h = heightAt(wx, wz);
 					const nrm = normalAt(wx, wz);
 					if (h > bushMaxHeight || nrm.y < 0.86) continue;
@@ -588,8 +603,8 @@
 				}
 
 				for (let i = 0; i < rockAttemptsPerChunk; i++) {
-					const wx = cx * chunkSize + (rand() - 0.5) * chunkSize;
-					const wz = cz * chunkSize + (rand() - 0.5) * chunkSize;
+					const wx = cx * CHUNK_SIZE + (rand() - 0.5) * CHUNK_SIZE;
+					const wz = cz * CHUNK_SIZE + (rand() - 0.5) * CHUNK_SIZE;
 					const h = heightAt(wx, wz);
 					const nrm = normalAt(wx, wz);
 					if (h < rockMinHeight || nrm.y > 0.82) continue;
@@ -608,13 +623,13 @@
 			function chunkKey(cx, cz) { return `${cx},${cz}`; }
 
 			function makeChunk(cx, cz) {
-				const geo = new THREE.PlaneGeometry(chunkSize, chunkSize, chunkSegs, chunkSegs);
+				const geo = new THREE.PlaneGeometry(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SEGS, CHUNK_SEGS);
 				geo.rotateX(-Math.PI / 2);
 				const pos = geo.attributes.position;
 
 				for (let i = 0; i < pos.count; i++) {
-					const wx = pos.getX(i) + cx * chunkSize;
-					const wz = pos.getZ(i) + cz * chunkSize;
+					const wx = pos.getX(i) + cx * CHUNK_SIZE;
+					const wz = pos.getZ(i) + cz * CHUNK_SIZE;
 
 					const raw =
 						perlin2(wx * 0.003, wz * 0.003) * 1.0 +
@@ -654,22 +669,22 @@
 				});
 
 				const mesh = new THREE.Mesh(geo, mat);
-				mesh.position.set(cx * chunkSize, 0, cz * chunkSize);
+				mesh.position.set(cx * CHUNK_SIZE, 0, cz * CHUNK_SIZE);
 				scene.add(mesh);
 				groundMeshes.push(mesh);
 				scanChunkForPeak(cx, cz);
-				buildDecorationsForChunk(cx, cz);
+				//buildDecorationsForChunk(cx, cz);
 				return mesh;
 			}
 
 			function updateChunks() {
 				if (!torso || !gameStarted || !perlin2) return;
 
-				const cx = Math.round(torso.position.x / chunkSize);
-				const cz = Math.round(torso.position.z / chunkSize);
+				const cx = Math.round(torso.position.x / CHUNK_SIZE);
+				const cz = Math.round(torso.position.z / CHUNK_SIZE);
 
-				for (let dx = -viewDist; dx <= viewDist; dx++) {
-					for (let dz = -viewDist; dz <= viewDist; dz++) {
+				for (let dx = -VIEW_DIST; dx <= VIEW_DIST; dx++) {
+					for (let dz = -VIEW_DIST; dz <= VIEW_DIST; dz++) {
 						const key = chunkKey(cx + dx, cz + dz);
 						if (!chunks[key]) {
 							chunks[key] = makeChunk(cx + dx, cz + dz);
@@ -677,17 +692,9 @@
 					}
 				}
 
-				for (const key in chunkDecorations) {
-					const [kcx, kcz] = key.split(',').map(Number);
-					const inGrassRange = Math.abs(kcx - cx) <= grassRadius && Math.abs(kcz - cz) <= grassRadius;
-					for (const mesh of chunkDecorations[key].meshes) {
-						if (mesh.isInstancedMesh) mesh.visible = inGrassRange;
-					}
-				}
-
 				for (const key in chunks) {
 					const [kcx, kcz] = key.split(',').map(Number);
-					if (Math.abs(kcx - cx) > viewDist + 1 || Math.abs(kcz - cz) > viewDist + 1) {
+					if (Math.abs(kcx - cx) > VIEW_DIST + 1 || Math.abs(kcz - cz) > VIEW_DIST + 1) {
 						scene.remove(chunks[key]);
 						groundMeshes.splice(groundMeshes.indexOf(chunks[key]), 1);
 						chunks[key].geometry.dispose();
@@ -720,8 +727,8 @@
 			}
 			function scanChunkForPeak(cx, cz) {
 				const step = 1;
-				for (let wx = cx * chunkSize; wx <= (cx + 1) * chunkSize; wx += step) {
-					for (let wz = cz * chunkSize; wz <= (cz + 1) * chunkSize; wz += step) {
+				for (let wx = cx * CHUNK_SIZE; wx <= (cx + 1) * CHUNK_SIZE; wx += step) {
+					for (let wz = cz * CHUNK_SIZE; wz <= (cz + 1) * CHUNK_SIZE; wz += step) {
 						const raw =
 							perlin2(wx * 0.003, wz * 0.003) * 1.0 +
 							perlin2(wx * 0.012, wz * 0.012) * 0.3 +
@@ -740,14 +747,17 @@
 				}
 			}
 
+			let peakSearchRadius = 0;
+			const PEAK_SEARCH_STEP = 100;
+			const PEAK_SEARCH_RING = 1200;
 			let maxx = 0;
 			async function findPeak() {
 				document.getElementById('peakDisplay').textContent = `Peak: searching...`;
 				let x = 0, z = 0;
 				let step = 1, stepCount = 0, dir = 0, turns = 0;
-				const stepSize = 1; 
-				const dx = [stepSize, 0, -stepSize, 0];
-				const dz = [0, stepSize, 0, -stepSize];
+				const STEP = 1; 
+				const dx = [STEP, 0, -STEP, 0];
+				const dz = [0, STEP, 0, -STEP];
 				let batch = 0;
 
 				while (true) {
@@ -844,12 +854,14 @@
 			const flo = new THREE.Mesh(geo2, mat2);
 			flo.rotation.x = Math.PI / 2
 			flo.position.y = -0.2
+			//scene.add(flo);
 			const geo3 = new THREE.PlaneGeometry(1000, 1000);
 			const mat3 = new THREE.MeshStandardMaterial({ map: floor, 
 														 side: THREE.DoubleSide });
 			const flr = new THREE.Mesh(geo2, mat2);
 			flr.rotation.x = Math.PI / 2
 			flr.position.y = -0.3
+			//scene.add(flr);
 			const light = new THREE.AmbientLight(0xffffff, .3);
 			scene.add(light);
 			const light2 = new THREE.DirectionalLight(0xffffff, 1.5);
@@ -1004,7 +1016,7 @@
 				if (msg.id === myId) return;
 
 				if (msg.type === 'move') {
-					if (msg.worldSeed !== undefined && msg.worldSeed !== worldSeed) {
+					if (msg.worldSeed !== undefined && msg.worldSeed !== WORLD_SEED) {
 						delete playerData[msg.id];
 						removePlayer(msg.id);
 						return;
@@ -1172,12 +1184,12 @@
 			let mname = 'derg'
 			let mcolor = '#000000';
 			document.getElementById('playBtn').addEventListener('click', () => {
-				worldSeed = parseInt(document.getElementById('seedInput').value) || 1;
+				WORLD_SEED = parseInt(document.getElementById('seedInput').value) || 1;
 				mcolor = document.getElementById('colorInput').value;
 				mname = document.getElementById('nameInput').value.trim() || 'derg'
-				perlin2 = createNoise(worldSeed);
+				perlin2 = createNoise(WORLD_SEED);
 				document.getElementById('startScreen').style.display = 'none';
-				document.getElementById('seedDisplay').textContent = 'Seed: ' + worldSeed;
+				document.getElementById('seedDisplay').textContent = 'Seed: ' + WORLD_SEED;
 				gameStarted = true;
 				findPeak();
 			});
@@ -1203,27 +1215,27 @@
 					const btn = document.createElement('button');
 					btn.textContent = name.replace('is', '').toLowerCase();
 					btn.style.cssText = `
-padding: 10px 0;
-background: ${stance === name ? '#ffffff' : 'transparent'};
-color: ${stance === name ? '#000' : '#fff'};
-border: 1px solid #ffffff;
-cursor: pointer;
-font-family: monospace;
-font-size: 13px;
-`;
+		padding: 10px 0;
+		background: ${stance === name ? '#ffffff' : 'transparent'};
+		color: ${stance === name ? '#000' : '#fff'};
+		border: 1px solid #ffffff;
+		cursor: pointer;
+		font-family: monospace;
+		font-size: 13px;
+		`;
 					btn.addEventListener('click', () => {
 						if (name !== stance) {
 							stance = name;
 							openStance();
 							if (socket.readyState === 1) {
 								const stanceName = name === 'none' ? 'walking' : name.replace('is', '').toLowerCase();
-								        socket.send(JSON.stringify({
-								            type: 'chat',
-								            name: 'server:',
-								            color: '#aaaaaa',
-								            msg: mname + ' is ' + stanceName + '.'
-								        }));
-								    }
+						        socket.send(JSON.stringify({
+						            type: 'chat',
+						            name: 'server:',
+						            color: '#aaaaaa',
+						            msg: mname + ' is ' + stanceName + '.'
+						        }));
+						    }
 						}
 					});
 					grid.appendChild(btn);
@@ -1382,7 +1394,6 @@ font-size: 13px;
 							wing2.rotation.x += (0 - wing2.rotation.x) * 0.20;
 							stance = 'none'
 						}
-						torso.getWorldDirection(forw);
 						if (keys['d']) { 
 							if (!isFlying) {
 								if (stance == stanceL[0]) torso.rotateOnAxis(yaxis, -0.02);
@@ -1412,7 +1423,6 @@ font-size: 13px;
 						if (keys['s']) { 
 							if (isFlying) {
 								torso.rotateOnAxis(paxis, -0.02 + (wing2.rotation.y - minrot - 0.3) * 0.01); 
-								vel.y -= 0.06;
 								pitching = -1; 
 							} else {
 								if (stance == stanceL[0]) vel.addScaledVector(forw, -0.02);
@@ -1425,7 +1435,6 @@ font-size: 13px;
 						if (keys['w']) { 
 							if (isFlying) {
 								torso.rotateOnAxis(paxis,  0.02 + (wing2.rotation.y - minrot - 0.3) * -0.01); 
-								vel.y += 0.06;
 								pitching =  1; 
 							} else {
 								if (stance == stanceL[0]) vel.addScaledVector(forw, 0.04);
@@ -1464,6 +1473,7 @@ font-size: 13px;
 							if (plus > -0.01 && plus < 0.01) plus = 0;
 						}
 						torso.getWorldDirection(forw);
+
 						const wingFactor = THREE.MathUtils.clamp(
 							(wing2.rotation.y - minrot) / (maxrot - minrot), 0, 1
 						);
@@ -1507,7 +1517,7 @@ font-size: 13px;
 						const q = torso.quaternion;
 						socket.send(JSON.stringify({
 							type: 'move',
-							worldSeed: worldSeed,
+							worldSeed: WORLD_SEED,
 							color: mcolor,
 							name: mname,
 							pos:  { x: torso.position.x, y: torso.position.y, z: torso.position.z },
@@ -1530,17 +1540,15 @@ font-size: 13px;
 						.addScaledVector(camB, -7)
 						.addScaledVector(camU, 3);
 					cam.position.lerp(camt, 0.1);
-					cam.up.lerp(camU, 0.1).normalize();
+					cam.up.lerp(camU, 0.1);
 					cam.lookAt(headpos);
 					if (isFlying) {
 						const targetFlapSpeed = 0.05 + seed * 0.07 + plus * 0.05;
 						flapSpeed += (targetFlapSpeed - flapSpeed) * 0.04;
 						flapPhase += flapSpeed;
 
-						const rawTargetY2 = (seed * 2) + Math.PI + plus;
-						const rawTargetY1 = (-seed * 2) - Math.PI - plus;
-						const targetY2 = THREE.MathUtils.clamp(rawTargetY2, minrot, maxrot);
-						const targetY1 = THREE.MathUtils.clamp(rawTargetY1, -maxrot, -minrot);
+						const targetY2 = Math.min((seed * 2) + Math.PI + plus, 4.6);
+						const targetY1 = Math.max((-seed * 2) - Math.PI - plus, -4.6);
 						wing2.rotation.y += (targetY2 - wing2.rotation.y) * 0.07;
 						wing1.rotation.y += (targetY1 - wing1.rotation.y) * 0.07;
 
