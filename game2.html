@@ -1530,7 +1530,7 @@ font-size: 13px;
 						.addScaledVector(camB, -7)
 						.addScaledVector(camU, 3);
 					cam.position.lerp(camt, 0.1);
-					cam.up.lerp(camU, 0.1);
+					cam.up.lerp(camU, 0.1).normalize();
 					cam.lookAt(headpos);
 					if (isFlying) {
 						const targetFlapSpeed = 0.05 + seed * 0.07 + plus * 0.05;
