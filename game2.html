@@ -1011,7 +1011,13 @@
 				if (msg.type === 'init') {
 					myId = msg.id;
 				}
-				if (msg.type === 'chat') addChatMessage(msg.name, msg.msg, msg.color ?? '#ffffff');
+				if (msg.type === 'chat') { 
+					if ( msg == '/clear' ) {
+						console.clear();
+					} else {
+						addChatMessage(msg.name, msg.msg, msg.color ?? '#ffffff'); 
+					}
+				}
 
 				if (msg.id === myId) return;
 
@@ -1207,7 +1213,7 @@
 					gap: 8px;
 					width: 260px;
 					"></div>
-					`;
+				`;
 
 				const grid = document.getElementById('stanceGrid');
 
@@ -1215,14 +1221,14 @@
 					const btn = document.createElement('button');
 					btn.textContent = name.replace('is', '').toLowerCase();
 					btn.style.cssText = `
-		padding: 10px 0;
-		background: ${stance === name ? '#ffffff' : 'transparent'};
-		color: ${stance === name ? '#000' : '#fff'};
-		border: 1px solid #ffffff;
-		cursor: pointer;
-		font-family: monospace;
-		font-size: 13px;
-		`;
+						padding: 10px 0;
+						background: ${stance === name ? '#ffffff' : 'transparent'};
+						color: ${stance === name ? '#000' : '#fff'};
+						border: 1px solid #ffffff;
+						cursor: pointer;
+						font-family: monospace;
+						font-size: 13px;
+					`;
 					btn.addEventListener('click', () => {
 						if (name !== stance) {
 							stance = name;
@@ -1590,7 +1596,7 @@
 					p.nameLabel.scale.set(labelSize * 4, labelSize, 1);
 					if (d.parts) {
 						const t = d.parts;
-						if (p.cHead)  p.cHead.rotation.set(t.head.rx,   t.head.ry,   t.head.rz);
+						if (p.cHead)  p.cHead.rotation.set( t.head.rx,  t.head.ry,   t.head.rz);
 						if (p.cWing1) p.cWing1.rotation.set(t.wing1.rx, t.wing1.ry,  t.wing1.rz);
 						if (p.cWing2) p.cWing2.rotation.set(t.wing2.rx, t.wing2.ry,  t.wing2.rz);
 						if (p.cTail1) p.cTail1.rotation.set(t.tail1.rx, t.tail1.ry,  t.tail1.rz);
