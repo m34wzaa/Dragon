@@ -1012,7 +1012,7 @@
 					myId = msg.id;
 				}
 				if (msg.type === 'chat') { 
-					if ( msg == '/clear' ) {
+					if (msg.endsWith('/clear')) {
 						console.clear();
 					} else {
 						addChatMessage(msg.name, msg.msg, msg.color ?? '#ffffff'); 
